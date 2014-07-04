@@ -13,7 +13,6 @@ import com.actionbarsherlock.app.SherlockFragment;
 import com.viewpagerindicator.CirclePageIndicator;
 
 import in.msme.cic.R;
-import in.msme.cic.MainActivity.Main;
 
 public class PageSlidingTabStripFragment extends Fragment {
 	

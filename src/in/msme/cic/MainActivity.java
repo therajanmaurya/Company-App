@@ -63,13 +63,13 @@ public class MainActivity extends SherlockFragmentActivity  implements OnItemCli
 			@Override
 			public void onDrawerOpened(View drawerView) {
 				// TODO Auto-generated method stub
-				Toast.makeText(MainActivity.this, "Drawer Open", Toast.LENGTH_SHORT).show();
+				//Toast.makeText(MainActivity.this, "Drawer Open", Toast.LENGTH_SHORT).show();
 			}
 			
 			@Override
 			public void onDrawerClosed(View drawerView) {
 				// TODO Auto-generated method stub
-				Toast.makeText(MainActivity.this, "Drawer close", Toast.LENGTH_SHORT).show();
+				//Toast.makeText(MainActivity.this, "Drawer close", Toast.LENGTH_SHORT).show();
 			}
 		};
 		drawerLayout.setDrawerListener(drawerListner);
@@ -122,7 +122,7 @@ public class MainActivity extends SherlockFragmentActivity  implements OnItemCli
 			long id) {
 		// TODO Auto-generated method stub
 		if(drawerLayout.isDrawerVisible(Gravity.LEFT)){
-		Toast.makeText(this , titles[position]+" item clicked", Toast.LENGTH_SHORT).show();
+		//Toast.makeText(this , titles[position]+" item clicked", Toast.LENGTH_SHORT).show();
 		selectedItem(position);
 		
 		switch(position){
@@ -234,193 +234,5 @@ public class MainActivity extends SherlockFragmentActivity  implements OnItemCli
 		getSupportActionBar().setTitle(title);
 	}}
 
-	/**@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		if (!mNavigationDrawerFragment.isDrawerOpen()) {
-			// Only show items in the action bar relevant to this screen
-			// if the drawer is not showing. Otherwise, let the drawer
-			// decide what to show in the action bar.
-			getMenuInflater().inflate(R.menu.main, menu);
-			restoreActionBar();
-			return true;
-		}
-		return super.onCreateOptionsMenu(menu);
-	}
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		// Handle action bar item clicks here. The action bar will
-		// automatically handle clicks on the Home/Up button, so long
-		// as you specify a parent activity in AndroidManifest.xml.
-		int id = item.getItemId();
-		if (id == R.id.action_settings) {
-			return true;
-		}
-		return super.onOptionsItemSelected(item);
-	}*/
-	
-	
-	
-	public static class Main extends Fragment{
-		
-		
-		@SuppressLint("ValidFragment")
-		public static Main newInstance(int sectionNumber){
-			Main fragment = new Main();
-			Bundle args = new Bundle();
-			args.putInt(ARG_SECTION_NUMBER, sectionNumber);
-	        fragment.setArguments(args);
-			return fragment;
-			
-		}
-
-		public Main() {
-			// TODO Auto-generated constructor stub
-		}
-		@Override
-		public View onCreateView(LayoutInflater inflater, ViewGroup container,
-				Bundle savedInstanceState) {
-			// TODO Auto-generated method stub
-			return inflater.inflate(R.layout.fragment_main, container, false);
-		}
-	}
-
-public static class Services extends Fragment {
-		
-	public static Services newInstance(int sectionNumber){
-		Services fragment = new Services();
-		Bundle args = new Bundle();
-		args.putInt(ARG_SECTION_NUMBER, sectionNumber);
-        fragment.setArguments(args);
-		return fragment;		
-	}
-		public Services() {
-		}
-
-		@Override
-		public View onCreateView(LayoutInflater inflater, ViewGroup container,
-				Bundle savedInstanceState) {
-			return inflater.inflate(R.layout.fragment_services, container,
-					false);
-		}
-	}
-
-public static class Deals extends Fragment {
-	
-	public static Deals newInstance(int sectionNumber){
-		Deals fragment = new Deals();
-		Bundle args = new Bundle();
-		args.putInt(ARG_SECTION_NUMBER, sectionNumber);
-        fragment.setArguments(args);
-		return fragment;		
-	}
-	
-	public Deals() {
-	}
-
-	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container,
-			Bundle savedInstanceState) {
-		return inflater.inflate(R.layout.fragment_deals, container,
-				false);
-	}
-}
-public static class Events extends Fragment {
-	
-	public static Events newInstance(int sectionNumber){
-		Events fragment = new Events();
-		Bundle args = new Bundle();
-		args.putInt(ARG_SECTION_NUMBER, sectionNumber);
-        fragment.setArguments(args);
-		return fragment;		
-	}
-	public Events() {
-	}
-
-	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container,
-			Bundle savedInstanceState) {
-		return inflater.inflate(R.layout.fragment_events, container,
-				false);
-	}
-}
-
-public static class Latest extends Fragment {
-	
-	public static Latest newInstance(int sectionNumber){
-		Latest fragment = new Latest();
-		Bundle args = new Bundle();
-		args.putInt(ARG_SECTION_NUMBER, sectionNumber);
-        fragment.setArguments(args);
-		return fragment;		
-	}
-	public Latest() {
-	}
-
-	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container,
-			Bundle savedInstanceState) {
-		return inflater.inflate(R.layout.fragment_latest, container,
-				false);
-	}
-}
-public static class Connect extends Fragment {
-
-	public static Connect newInstance(int sectionNumber){
-		Connect fragment = new Connect();
-		Bundle args = new Bundle();
-		args.putInt(ARG_SECTION_NUMBER, sectionNumber);
-        fragment.setArguments(args);
-		return fragment;		
-	}
-public Connect() {
-}
-
-@Override
-public View onCreateView(LayoutInflater inflater, ViewGroup container,
-		Bundle savedInstanceState) {
-	return inflater.inflate(R.layout.fragment_connect, container,
-			false);
-}
-}
-public static class Downloads extends Fragment {
-
-	public static Downloads newInstance(int sectionNumber){
-		Downloads fragment = new Downloads();
-		Bundle args = new Bundle();
-		args.putInt(ARG_SECTION_NUMBER, sectionNumber);
-        fragment.setArguments(args);
-		return fragment;		
-	}
-	
-public Downloads() {
-}
-
-@Override
-public View onCreateView(LayoutInflater inflater, ViewGroup container,
-		Bundle savedInstanceState) {
-	return inflater.inflate(R.layout.fragment_downloads, container,
-			false);
-}
-}
-public static class Gallery extends Fragment {
-
-	public static Gallery newInstance(int sectionNumber){
-		Gallery fragment = new Gallery();
-		Bundle args = new Bundle();
-		args.putInt(ARG_SECTION_NUMBER, sectionNumber);
-        fragment.setArguments(args);
-		return fragment;		
-	}
-public Gallery() {
-}
-
-@Override
-public View onCreateView(LayoutInflater inflater, ViewGroup container,
-		Bundle savedInstanceState) {
-	return inflater.inflate(R.layout.fragment_gallery, container,
-			false);
-}
-}
 
 }
