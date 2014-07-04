@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">MSME</string>
+    <string name="action_contact">Contact</string>
+
+    <string-array name="msme_names">
+        <item>Home</item>
+        <item>Services</item>
+        <item>Deals</item>
+        <item>Events</item>
+        <item>Latest</item>
+        <item>Connect</item>
+        <item>Downloads</item>
+        <item>Gallery</item>
+    </string-array>
+    
+    <string-array name="contact_me">
+        <item>Facebook</item>
+        <item>Twitter</item>
+        <item>Google Plus</item>
+        <item>Youtube</item>
+        <item>Instagram</item>
+        <item>tumblr</item>
+        <item>Pinterest</item>
+        <item>Website</item>
+        <item>Flickr</item>
+        <item>StumbleUpon</item>
+        <item>Map</item>
+    </string-array>
+
+    <string name="drawer_open">Open navigation drawer</string>
+    <string name="drawer_close">Close navigation drawer</string>
+    <string name="action_websearch">Web search</string>
+    <string name="app_not_available">Sorry, there\'s no web browser available</string>
+
+</resources>

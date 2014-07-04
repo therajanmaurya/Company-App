@@ -1,0 +1,34 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical" >
+
+    <fragment
+        android:id="@+id/home1"
+        android:name="in.msme.cic.PageSlidingTabStripFragment"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:layout_weight="1" />
+
+    <fragment
+        android:id="@+id/home2"
+        android:name="in.msme.cic.MainActivity.Services"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:layout_weight="1" />
+
+    <fragment
+        android:id="@+id/home3"
+        android:name="in.msme.cic.MainActivity.Deals"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:layout_weight="1" />
+
+    <fragment
+        android:id="@+id/home4"
+        android:name="in.msme.cic.MainActivity.Events"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:layout_weight="1" />
+
+</LinearLayout>
