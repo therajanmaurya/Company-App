@@ -79,7 +79,7 @@ public class MainActivity extends SherlockFragmentActivity  implements OnItemCli
 		if (savedInstanceState == null) {
 			getSupportFragmentManager()
 			.beginTransaction()
-			.replace(R.id.content, PageSlidingTabStripFragment.newInstance(0))
+			.replace(R.id.content, home.newInstance(0))
 			.commit();
 		
 		}
@@ -128,7 +128,7 @@ public class MainActivity extends SherlockFragmentActivity  implements OnItemCli
 		switch(position){
 		case 0: getSupportFragmentManager()
         				.beginTransaction()
-        				.replace(R.id.content, PageSlidingTabStripFragment.newInstance(position + 1))
+        				.replace(R.id.content, home.newInstance(position + 1))
         				.commit();
 						break;
 		
@@ -235,4 +235,6 @@ public class MainActivity extends SherlockFragmentActivity  implements OnItemCli
 	}}
 
 
+	
+	
 }
