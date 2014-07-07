@@ -3,6 +3,7 @@ package in.msme.cic;
 import com.actionbarsherlock.app.SherlockFragment;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -10,6 +11,8 @@ import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.View.OnClickListener;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -18,8 +21,12 @@ import android.widget.Toast;
 
 public class Services extends SherlockFragment {
 
-	// Resources res = getResources();
-	// String[] prgmNameList = res.getStringArray(R.array.service);
+	String[] url = {
+			"http://iamsmeofindia.com/services/credit-facilitation-centre",
+			"http://iamsmeofindia.com/services/i-tree",
+			"http://iamsmeofindia.com/siti-centre",
+			"http://iamsmeofindia.com/services/energy-efficiency",
+			"http://iamsmeofindia.com/services/innovation-cluster" };
 	ListView listservice;
 	Context context;
 	private static final String ARG_SECTION_NUMBER = "section_number";
@@ -28,12 +35,19 @@ public class Services extends SherlockFragment {
 			R.drawable.service5 };
 	public static String[] prgmNameList = { "CREDIT FACILITATION CENTRE",
 			"I TREE", "SITI CENTRE", "ENERGY EFFICIENCY", "INNOVATION CLUSTER" };
-	/*public static String[] subprgm = {
-			"A Memorandum of understanding \n (MoU) was signed between SIDBI \n and FSIA on 20th december 2008",
-			"iTree is innovative step towards skill \n  development wherein we fill skillgao \n  between the existing acadimic setup and industry",
-			"SITI centre is step in helping the MSME'S Identify \n new business opportunities , create efficencies, \n new products development , identify ne markets through innovation and know how ",
-			"iamsmeofindia  as a nodal agency is \n working towards making SME'S Energy efficient",
-			"National Innovation Council (NInC) has selected IAMSME \n of India to implement the Innovation \n Cluster for Auto Components in Faridabad." };*/
+	/*
+	 * public static String[] subprgm = {
+	 * "A Memorandum of understanding \n (MoU) was signed between SIDBI \n and FSIA on 20th december 2008"
+	 * ,
+	 * "iTree is innovative step towards skill \n  development wherein we fill skillgao \n  between the existing acadimic setup and industry"
+	 * ,
+	 * "SITI centre is step in helping the MSME'S Identify \n new business opportunities , create efficencies, \n new products development , identify ne markets through innovation and know how "
+	 * ,
+	 * "iamsmeofindia  as a nodal agency is \n working towards making SME'S Energy efficient"
+	 * ,
+	 * "National Innovation Council (NInC) has selected IAMSME \n of India to implement the Innovation \n Cluster for Auto Components in Faridabad."
+	 * };
+	 */
 
 	serviceadapter adapter;
 
@@ -54,10 +68,19 @@ public class Services extends SherlockFragment {
 		View V = inflater.inflate(R.layout.fragment_services, container, false);
 		// context = this;
 		listservice = (ListView) V.findViewById(R.id.servicelist);
-
 		adapter = new serviceadapter(getActivity(), prgmNameList, prgmImages);
-
 		listservice.setAdapter(adapter);
+
+		listservice.setOnItemClickListener(new OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> adapter, View view,
+					int position, long arg) {
+				Intent intent = new Intent(getActivity(), Webview.class);
+				intent.putExtra("message", url[position]);
+				startActivity(intent);
+			}
+		});
+
 		return V;
 	}
 
@@ -75,13 +98,13 @@ class serviceadapter extends BaseAdapter {
 	Context context;
 	int[] imageId;
 	private static LayoutInflater inflater = null;
-	
+
 	public static String[] subprgm = {
-		"A Memorandum of understanding \n (MoU) was signed between SIDBI \n and FSIA on 20th december 2008",
-		"iTree is innovative step towards skill \n  development wherein we fill skillgao \n  between the existing acadimic setup and industry",
-		"SITI centre is step in helping the MSME'S Identify \n new business opportunities , create efficencies, \n new products development , identify ne markets through innovation and know how ",
-		"iamsmeofindia  as a nodal agency is \n working towards making SME'S Energy efficient",
-		"National Innovation Council (NInC) has selected IAMSME \n of India to implement the Innovation \n Cluster for Auto Components in Faridabad." };
+			"A Memorandum of understanding \n (MoU) was signed between SIDBI \n and FSIA on 20th december 2008",
+			"iTree is innovative step towards skill \n  development wherein we fill skillgao \n  between the existing acadimic setup and industry",
+			"SITI centre is step in helping the MSME'S Identify \n new business opportunities , create efficencies, \n new products development , identify ne markets through innovation and know how ",
+			"iamsmeofindia  as a nodal agency is \n working towards making SME'S Energy efficient",
+			"National Innovation Council (NInC) has selected IAMSME \n of India to implement the Innovation \n Cluster for Auto Components in Faridabad." };
 
 	public serviceadapter(Context services, String[] prgmNameList,
 			int[] prgmImages) {
@@ -112,7 +135,7 @@ class serviceadapter extends BaseAdapter {
 	}
 
 	public class Holder {
-		TextView tv ,tv1;
+		TextView tv, tv1;
 		ImageView img;
 	}
 
@@ -125,7 +148,7 @@ class serviceadapter extends BaseAdapter {
 		rowView = inflater.inflate(R.layout.servicelistitem, null);
 
 		holder.tv = (TextView) rowView.findViewById(R.id.heading);
-		holder.tv1= (TextView) rowView.findViewById(R.id.subhead);
+		holder.tv1 = (TextView) rowView.findViewById(R.id.subhead);
 		holder.tv1.setHeight(50);
 		holder.tv1.setMinimumHeight(50);
 		holder.tv1.setText(subprgm[position]);
