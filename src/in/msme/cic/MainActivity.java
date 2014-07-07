@@ -19,10 +19,12 @@ package in.msme.cic;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.Fragment;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -35,58 +37,74 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
-public class MainActivity extends SherlockFragmentActivity  implements OnItemClickListener{
+public class MainActivity extends SherlockFragmentActivity implements
+		OnItemClickListener {
 
 	protected DrawerLayout drawerLayout;
 	public ListView listView, listView2;
-	public String[] titles; 
+	public String[] titles;
 	public String[] contacts;
 	private ActionBarDrawerToggle drawerListner;
 	private static final String ARG_SECTION_NUMBER = "section_number";
-	public int counter =0;
-	
+	public int counter = 0;
+
+	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
+	@SuppressLint("InlinedApi")
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		drawerLayout=(DrawerLayout)findViewById(R.id.drawer_layout);
-		listView=(ListView)findViewById(R.id.left_drawer);
-		listView2=(ListView)findViewById(R.id.right_drawer);
-		titles= getResources().getStringArray(R.array.msme_names);
+		drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+		listView = (ListView) findViewById(R.id.left_drawer);
+		listView2 = (ListView) findViewById(R.id.right_drawer);
+		titles = getResources().getStringArray(R.array.msme_names);
 		contacts = getResources().getStringArray(R.array.contact_me);
-		listView.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_selectable_list_item, titles));
-		listView2.setAdapter(new ArrayAdapter<String>(this , android.R.layout.simple_selectable_list_item, contacts));
+		listView.setAdapter(new ArrayAdapter<String>(this,
+				android.R.layout.simple_selectable_list_item, titles));
+		listView2.setAdapter(new ArrayAdapter<String>(this,
+				android.R.layout.simple_selectable_list_item, contacts));
 		listView.setOnItemClickListener(this);
 		listView2.setOnItemClickListener(this);
-		
-		drawerListner = new ActionBarDrawerToggle(this, drawerLayout, R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close){
+
+		drawerListner = new ActionBarDrawerToggle(this, drawerLayout,
+				R.drawable.ic_drawer, R.string.drawer_open,
+				R.string.drawer_close) {
 			@Override
 			public void onDrawerOpened(View drawerView) {
 				// TODO Auto-generated method stub
-				//Toast.makeText(MainActivity.this, "Drawer Open", Toast.LENGTH_SHORT).show();
+				// Toast.makeText(MainActivity.this, "Drawer Open",
+				// Toast.LENGTH_SHORT).show();
 			}
-			
+
 			@Override
 			public void onDrawerClosed(View drawerView) {
 				// TODO Auto-generated method stub
-				//Toast.makeText(MainActivity.this, "Drawer close", Toast.LENGTH_SHORT).show();
+				// Toast.makeText(MainActivity.this, "Drawer close",
+				// Toast.LENGTH_SHORT).show();
 			}
 		};
 		drawerLayout.setDrawerListener(drawerListner);
 		getSupportActionBar().setHomeButtonEnabled(true);
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-		
+
 		if (savedInstanceState == null) {
 			getSupportFragmentManager()
+<<<<<<< HEAD
 			.beginTransaction()
 			.replace(R.id.content, home.newInstance(0))
 			.commit();
 		
+=======
+					.beginTransaction()
+					.replace(R.id.content,
+							PageSlidingTabStripFragment.newInstance(0))
+					.commit();
+
+>>>>>>> 3aaf36e250290d56aa6f61871260f5ec5515477d
 		}
-		
+
 	}
-	
-	
+
 	@Override
 	public boolean onOptionsItemSelected(
 			com.actionbarsherlock.view.MenuItem item) {
@@ -117,10 +135,12 @@ public class MainActivity extends SherlockFragmentActivity  implements OnItemCli
 		super.onPostCreate(savedInstanceState);
 		drawerListner.syncState();
 	}
+
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int position,
 			long id) {
 		// TODO Auto-generated method stub
+<<<<<<< HEAD
 		if(drawerLayout.isDrawerVisible(Gravity.LEFT)){
 		//Toast.makeText(this , titles[position]+" item clicked", Toast.LENGTH_SHORT).show();
 		selectedItem(position);
@@ -133,107 +153,154 @@ public class MainActivity extends SherlockFragmentActivity  implements OnItemCli
 						break;
 		
 		case 1: getSupportFragmentManager()
+=======
+		if (drawerLayout.isDrawerVisible(Gravity.LEFT)) {
+			// Toast.makeText(this , titles[position]+" item clicked",
+			// Toast.LENGTH_SHORT).show();
+			selectedItem(position);
+
+			switch (position) {
+			case 0:
+				getSupportFragmentManager()
+>>>>>>> 3aaf36e250290d56aa6f61871260f5ec5515477d
 						.beginTransaction()
-						.replace(R.id.content, Services.newInstance(position + 1))
-						.commit();
-						break;
-		case 2: getSupportFragmentManager()
+						.replace(
+								R.id.content,
+								PageSlidingTabStripFragment
+										.newInstance(position + 1)).commit();
+				break;
+
+			case 1:
+				getSupportFragmentManager()
 						.beginTransaction()
+						.replace(R.id.content,
+								Services.newInstance(position + 1)).commit();
+				break;
+			case 2:
+				getSupportFragmentManager().beginTransaction()
 						.replace(R.id.content, Deals.newInstance(position + 1))
 						.commit();
-						break;	
-		case 3: getSupportFragmentManager()
+				break;
+			case 3:
+				getSupportFragmentManager()
 						.beginTransaction()
 						.replace(R.id.content, Events.newInstance(position + 1))
 						.commit();
-						break;	
-		case 4: getSupportFragmentManager()
+				break;
+			case 4:
+				getSupportFragmentManager()
 						.beginTransaction()
 						.replace(R.id.content, Latest.newInstance(position + 1))
 						.commit();
-						break;	
-		case 5: getSupportFragmentManager()
+				break;
+			case 5:
+				getSupportFragmentManager()
 						.beginTransaction()
-						.replace(R.id.content, Connect.newInstance(position + 1))
-						.commit();
-						break;	
-		case 6: getSupportFragmentManager()
+						.replace(R.id.content,
+								Connect.newInstance(position + 1)).commit();
+				break;
+			case 6:
+				getSupportFragmentManager()
 						.beginTransaction()
-						.replace(R.id.content, Downloads.newInstance(position + 1))
-						.commit();
-						break;	
-		case 7: getSupportFragmentManager()
+						.replace(R.id.content,
+								Downloads.newInstance(position + 1)).commit();
+				break;
+			case 7:
+				getSupportFragmentManager()
 						.beginTransaction()
-						.replace(R.id.content, Gallery.newInstance(position + 1))
-						.commit();
-						break;
-						
-		}
-		}
-		else if(drawerLayout.isDrawerVisible(Gravity.RIGHT)){
-			
-			
-			switch (position) {
-			case 0: Intent facebook = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.facebook.com/pa1.pal"));
-            startActivity(facebook);
-            break;
+						.replace(R.id.content,
+								Gallery.newInstance(position + 1)).commit();
+				break;
+			default:
 
-			case 1: Intent twitter = new Intent(Intent.ACTION_VIEW, Uri.parse("https://twitter.com/pa1pal"));
-            startActivity(twitter);
-            break;
-            
-			case 2: Intent gplus = new Intent(Intent.ACTION_VIEW, Uri.parse("https://plus.google.com/u/0/+PawanPalPa1/posts"));
-            startActivity(gplus);
-            break;
-            
-			case 3: Intent yt = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.youtube.com"));
-            startActivity(yt);
-            break;
-            
-			case 4: Intent ig = new Intent(Intent.ACTION_VIEW, Uri.parse("http://instagram.com/"));
-            startActivity(ig);
-            break;
-            
-			case 5: Intent tm = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.tumblr.com/"));
-            startActivity(tm);
-            break;
-            
-			case 6: Intent pint = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.pinterest.com/"));
-            startActivity(pint);
-            break;
-            
-			case 7: Intent web = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.facebook.com/pa1.pal"));
-            startActivity(web);
-            break;
-            
-			case 8: Intent flickr = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.flickr.com/"));
-            startActivity(flickr);
-            break;
-            
-			case 9: Intent su = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.stumbleupon.com/"));
-            startActivity(su);
-            break;
-			
-            
+				getSupportFragmentManager()
+						.beginTransaction()
+						.replace(R.id.content,
+								Webview.newInstance(position + 1)).commit();
+				break;
+			}
+		} else if (drawerLayout.isDrawerVisible(Gravity.RIGHT)) {
+
+			switch (position) {
+			case 0:
+				Intent facebook = new Intent(Intent.ACTION_VIEW,
+						Uri.parse("https://www.facebook.com/pa1.pal"));
+				startActivity(facebook);
+				break;
+
+			case 1:
+				Intent twitter = new Intent(Intent.ACTION_VIEW,
+						Uri.parse("https://twitter.com/pa1pal"));
+				startActivity(twitter);
+				break;
+
+			case 2:
+				Intent gplus = new Intent(
+						Intent.ACTION_VIEW,
+						Uri.parse("https://plus.google.com/u/0/+PawanPalPa1/posts"));
+				startActivity(gplus);
+				break;
+
+			case 3:
+				Intent yt = new Intent(Intent.ACTION_VIEW,
+						Uri.parse("https://www.youtube.com"));
+				startActivity(yt);
+				break;
+
+			case 4:
+				Intent ig = new Intent(Intent.ACTION_VIEW,
+						Uri.parse("http://instagram.com/"));
+				startActivity(ig);
+				break;
+
+			case 5:
+				Intent tm = new Intent(Intent.ACTION_VIEW,
+						Uri.parse("https://www.tumblr.com/"));
+				startActivity(tm);
+				break;
+
+			case 6:
+				Intent pint = new Intent(Intent.ACTION_VIEW,
+						Uri.parse("https://www.pinterest.com/"));
+				startActivity(pint);
+				break;
+
+			case 7:
+				Intent web = new Intent(Intent.ACTION_VIEW,
+						Uri.parse("https://www.facebook.com/pa1.pal"));
+				startActivity(web);
+				break;
+
+			case 8:
+				Intent flickr = new Intent(Intent.ACTION_VIEW,
+						Uri.parse("https://www.flickr.com/"));
+				startActivity(flickr);
+				break;
+
+			case 9:
+				Intent su = new Intent(Intent.ACTION_VIEW,
+						Uri.parse("https://www.stumbleupon.com/"));
+				startActivity(su);
+				break;
+
 			}
 		}
 	}
 
-
-	
 	public void selectedItem(int position) {
 		// TODO Auto-generated method stub
-		if(drawerLayout.isDrawerVisible(Gravity.LEFT)){
-		listView.setItemChecked(position, true);
-		setTitle(titles[position]);}
+		if (drawerLayout.isDrawerVisible(Gravity.LEFT)) {
+			listView.setItemChecked(position, true);
+			setTitle(titles[position]);
+		}
 	}
 
 	public void setTitle(String title) {
 		// TODO Auto-generated method stub
-		if(drawerLayout.isDrawerVisible(Gravity.LEFT)){
-		getSupportActionBar().setTitle(title);
-	}}
-
+		if (drawerLayout.isDrawerVisible(Gravity.LEFT)) {
+			getSupportActionBar().setTitle(title);
+		}
+	}
 
 	
 	
