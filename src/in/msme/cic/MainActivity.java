@@ -19,10 +19,12 @@ package in.msme.cic;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.Fragment;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -45,7 +47,7 @@ public class MainActivity extends SherlockFragmentActivity  implements OnItemCli
 	private static final String ARG_SECTION_NUMBER = "section_number";
 	public int counter =0;
 	
-	@Override
+	@TargetApi(Build.VERSION_CODES.HONEYCOMB) @SuppressLint("InlinedApi") @Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
