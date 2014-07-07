@@ -1,48 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:orientation="vertical"
-    >
-    <fragment
-        android:id="@+id/fragmentfirst"
-        android:name="in.msme.cic.PageSlidingTabStripFragment"
-        android:layout_width="match_parent"
-        android:layout_height="300dp" />
-<ScrollView 
-    
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    >
-<LinearLayout 
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="vertical" >
 
-    
+    <ScrollView
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" >
 
-    <fragment
-        android:id="@+id/fragmentsecond"
-        android:name="in.msme.cic.First"
-        android:layout_width="match_parent"
-        android:layout_height="200dp" />
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:orientation="vertical" >
 
-    
+            <fragment
+                android:id="@+id/fragmentfirst"
+                android:name="in.msme.cic.PageSlidingTabStripFragment"
+                android:layout_width="match_parent"
+                android:layout_height="300dp" />
 
-    <fragment
-        android:id="@+id/fragmentforth"
-        android:name="in.msme.cic.Second"
-        android:layout_width="match_parent"
-        android:layout_height="200dp" />
+            <fragment
+                android:id="@+id/fragmentsecond"
+                android:name="in.msme.cic.First"
+                android:layout_width="match_parent"
+                android:layout_height="200dp" />
 
-    <fragment
-        android:id="@+id/fragmentthird"
-        android:name="in.msme.cic.Third"
-        android:layout_width="match_parent"
-        android:layout_height="200dp" />
+            <fragment
+                android:id="@+id/fragmentforth"
+                android:name="in.msme.cic.Second"
+                android:layout_width="match_parent"
+                android:layout_height="200dp" />
 
-</LinearLayout>
-</ScrollView>
+            <fragment
+                android:id="@+id/fragmentthird"
+                android:name="in.msme.cic.Third"
+                android:layout_width="match_parent"
+                android:layout_height="200dp" />
+        </LinearLayout>
+    </ScrollView>
 
 </FrameLayout>

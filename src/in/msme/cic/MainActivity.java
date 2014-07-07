@@ -89,18 +89,10 @@ public class MainActivity extends SherlockFragmentActivity implements
 
 		if (savedInstanceState == null) {
 			getSupportFragmentManager()
-<<<<<<< HEAD
-			.beginTransaction()
-			.replace(R.id.content, home.newInstance(0))
-			.commit();
-		
-=======
-					.beginTransaction()
-					.replace(R.id.content,
-							PageSlidingTabStripFragment.newInstance(0))
+
+			.beginTransaction().replace(R.id.content, home.newInstance(0))
 					.commit();
 
->>>>>>> 3aaf36e250290d56aa6f61871260f5ec5515477d
 		}
 
 	}
@@ -140,20 +132,7 @@ public class MainActivity extends SherlockFragmentActivity implements
 	public void onItemClick(AdapterView<?> parent, View view, int position,
 			long id) {
 		// TODO Auto-generated method stub
-<<<<<<< HEAD
-		if(drawerLayout.isDrawerVisible(Gravity.LEFT)){
-		//Toast.makeText(this , titles[position]+" item clicked", Toast.LENGTH_SHORT).show();
-		selectedItem(position);
-		
-		switch(position){
-		case 0: getSupportFragmentManager()
-        				.beginTransaction()
-        				.replace(R.id.content, home.newInstance(position + 1))
-        				.commit();
-						break;
-		
-		case 1: getSupportFragmentManager()
-=======
+
 		if (drawerLayout.isDrawerVisible(Gravity.LEFT)) {
 			// Toast.makeText(this , titles[position]+" item clicked",
 			// Toast.LENGTH_SHORT).show();
@@ -162,12 +141,9 @@ public class MainActivity extends SherlockFragmentActivity implements
 			switch (position) {
 			case 0:
 				getSupportFragmentManager()
->>>>>>> 3aaf36e250290d56aa6f61871260f5ec5515477d
 						.beginTransaction()
-						.replace(
-								R.id.content,
-								PageSlidingTabStripFragment
-										.newInstance(position + 1)).commit();
+						.replace(R.id.content,
+								home.newInstance(position + 1)).commit();
 				break;
 
 			case 1:
@@ -302,6 +278,4 @@ public class MainActivity extends SherlockFragmentActivity implements
 		}
 	}
 
-	
-	
 }
