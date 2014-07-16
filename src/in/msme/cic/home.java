@@ -7,9 +7,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-public class home extends Fragment{
+public class home extends Main{
 	
-	
+	public static final String TAG = home.class
+			.getSimpleName();
 	private static final String ARG_SECTION_NUMBER = "section position";
 	@SuppressLint("ValidFragment")
 	public static home newInstance(int sectionNumber){

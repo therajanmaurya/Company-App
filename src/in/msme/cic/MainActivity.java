@@ -142,8 +142,8 @@ public class MainActivity extends SherlockFragmentActivity implements
 			case 0:
 				getSupportFragmentManager()
 						.beginTransaction()
-						.replace(R.id.content,
-								home.newInstance(position + 1)).commit();
+						.add(R.id.content, home.newInstance(position), home.TAG)
+						.commit();
 				break;
 
 			case 1:
@@ -152,6 +152,7 @@ public class MainActivity extends SherlockFragmentActivity implements
 						.replace(R.id.content,
 								Services.newInstance(position + 1)).commit();
 				break;
+
 			case 2:
 				getSupportFragmentManager().beginTransaction()
 						.replace(R.id.content, Deals.newInstance(position + 1))
@@ -185,15 +186,15 @@ public class MainActivity extends SherlockFragmentActivity implements
 				getSupportFragmentManager()
 						.beginTransaction()
 						.replace(R.id.content,
-								Gallery.newInstance(position + 1)).commit();
+								Downloads.newInstance(position + 1)).commit();
 				break;
-			default:
-
-				getSupportFragmentManager()
-						.beginTransaction()
-						.replace(R.id.content,
-								Webview.newInstance(position + 1)).commit();
-				break;
+			/*
+			 * default:
+			 * 
+			 * getSupportFragmentManager() .beginTransaction()
+			 * .replace(R.id.content, Webview.newInstance(position +
+			 * 1)).commit(); break;
+			 */
 			}
 		} else if (drawerLayout.isDrawerVisible(Gravity.RIGHT)) {
 

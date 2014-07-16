@@ -1,40 +1,55 @@
 package in.msme.cic;
 
+import java.util.ArrayList;
+
 import com.actionbarsherlock.app.SherlockFragment;
+
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
+import android.app.Fragment;
 import android.content.Context;
-import android.content.Intent;
-import android.content.res.Resources;
+import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.View.OnClickListener;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
+@TargetApi(Build.VERSION_CODES.HONEYCOMB) 
 public class Services extends SherlockFragment {
-
-	String[] url = {
+	
+	ArrayList<String>  urlf = new ArrayList<String>();
+    String[] url = {
 			"http://iamsmeofindia.com/services/credit-facilitation-centre",
 			"http://iamsmeofindia.com/services/i-tree",
 			"http://iamsmeofindia.com/siti-centre",
 			"http://iamsmeofindia.com/services/energy-efficiency",
 			"http://iamsmeofindia.com/services/innovation-cluster" };
+    
 	ListView listservice;
+	WebView web ;
 	Context context;
+	Button bac;
 	private static final String ARG_SECTION_NUMBER = "section_number";
 	public static int[] prgmImages = { R.drawable.service1,
 			R.drawable.service2, R.drawable.service3, R.drawable.service4,
 			R.drawable.service5 };
 	public static String[] prgmNameList = { "CREDIT FACILITATION CENTRE",
 			"I TREE", "SITI CENTRE", "ENERGY EFFICIENCY", "INNOVATION CLUSTER" };
+	
+	//SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+	//SharedPreferences.Editor editor = sharedPref.edit();
 	/*
 	 * public static String[] subprgm = {
 	 * "A Memorandum of understanding \n (MoU) was signed between SIDBI \n and FSIA on 20th december 2008"
@@ -62,36 +77,91 @@ public class Services extends SherlockFragment {
 	public Services() {
 	}
 
-	@Override
+	@SuppressLint("SetJavaScriptEnabled") @Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		View V = inflater.inflate(R.layout.fragment_services, container, false);
-		// context = this;
 		listservice = (ListView) V.findViewById(R.id.servicelist);
+		web = (WebView)V.findViewById(R.id.webView1);
 		adapter = new serviceadapter(getActivity(), prgmNameList, prgmImages);
 		listservice.setAdapter(adapter);
-
+        urlf.add(url[0]);
+        urlf.add(url[1]);
+        urlf.add(url[2]);
+        urlf.add(url[3]);
+        urlf.add(url[4]);
 		listservice.setOnItemClickListener(new OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> adapter, View view,
 					int position, long arg) {
-				Intent intent = new Intent(getActivity(), Webview.class);
-				intent.putExtra("message", url[position]);
-				startActivity(intent);
+				
+				listservice.setVisibility(View.GONE);
+			
+				web.setVisibility(View.VISIBLE);
+				bac.setVisibility(View.VISIBLE);
+				WebSettings webSettings = web.getSettings();
+				webSettings.setJavaScriptEnabled(true);		
+				web.loadUrl(url[position]);
+				web.getSettings().setLoadWithOverviewMode(true);
+				web.getSettings().setAppCacheEnabled(false);
+				webSettings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
+				web.getSettings().setCacheMode(position);
+			    web.getSettings().setUseWideViewPort(true);
+			    web.getSettings().setBuiltInZoomControls(true);
+				web.setWebViewClient(new WebViewClient(){
+					@Override
+				    public boolean shouldOverrideUrlLoading(WebView view, String url){
+				      view.loadUrl(url);
+				      return true;
+				    }
+				});
+				
+				
+				
+				SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+				SharedPreferences.Editor editor = sharedPref.edit();
+				editor.putString("url_link", url[position]);
+				editor.commit();
+			    //Intent intent = new Intent(getActivity(), Webview.class);
+				//intent.putStringArrayListExtra("weburl", urlf);
+				//startActivity(intent);
+				/*String url = "http://www.google.com";
+				Intent i = new Intent(Intent.ACTION_VIEW);
+				i.setData(Uri.parse(url));
+				startActivity(i);*/
+				
+			
 			}
 		});
 
+		bac = (Button) V.findViewById(R.id.back);
+		bac.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				listservice.setVisibility(View.VISIBLE);
+				web.setVisibility(View.GONE);
+				bac.setVisibility(View.INVISIBLE);
+			}
+		});
+		 
+		
+		
+		
 		return V;
+		
 	}
-
+ 
 	@Override
 	public void onOptionsMenuClosed(Menu menu) {
 		// TODO Auto-generated method stub
 		super.onOptionsMenuClosed(menu);
 	}
+	
+	
 
 }
-
 @SuppressLint({ "ViewHolder", "InflateParams" })
 class serviceadapter extends BaseAdapter {
 	String[] result;
@@ -157,14 +227,14 @@ class serviceadapter extends BaseAdapter {
 		holder.tv.setMinimumHeight(100);
 		holder.tv.setText(result[position]);
 		holder.img.setImageResource(imageId[position]);
-		rowView.setOnClickListener(new OnClickListener() {
+		/*rowView.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
 				Toast.makeText(context, "You Clicked " + result[position],
 						Toast.LENGTH_LONG).show();
 			}
-		});
+		});*/
 		return rowView;
 	}
 }
