@@ -186,7 +186,7 @@ public class MainActivity extends SherlockFragmentActivity implements
 				getSupportFragmentManager()
 						.beginTransaction()
 						.replace(R.id.content,
-								Downloads.newInstance(position + 1)).commit();
+								Gallery.newInstance(position + 1)).commit();
 				break;
 			/*
 			 * default:
