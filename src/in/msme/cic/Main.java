@@ -2,9 +2,6 @@ package in.msme.cic;
 
 import java.io.IOException;
 
-import org.jsoup.Jsoup;
-import org.jsoup.select.Elements;
-
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.provider.DocumentsContract.Document;

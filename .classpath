@@ -6,7 +6,6 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="gen"/>
 	<classpathentry exported="true" kind="lib" path="C:/Users/Rajan Maurya/Desktop/cic_msme/android-support-v4.jar"/>
-	<classpathentry exported="true" kind="lib" path="C:/Users/Rajan Maurya/Desktop/cic_msme/jsoup-1.7.3.jar"/>
-	<classpathentry exported="true" kind="lib" path="C:/Users/Rajan Maurya/Desktop/cic_msme/universal-image-loader-1.9.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="C:/Users/Rajan Maurya/Desktop/cic_msme/universal-image-loader-1.9.3-SNAPSHOT.jar"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>

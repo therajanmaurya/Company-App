@@ -4,6 +4,10 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="#296970" >
-    
+
+    <WebView
+        android:id="@+id/web_connnect"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
 </LinearLayout>

@@ -17,7 +17,6 @@
 package in.msme.cic;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
-
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.support.v4.app.ActionBarDrawerToggle;
@@ -28,6 +27,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.support.v4.widget.DrawerLayout;
@@ -97,6 +99,8 @@ public class MainActivity extends SherlockFragmentActivity implements
 
 	}
 
+	
+	
 	@Override
 	public boolean onOptionsItemSelected(
 			com.actionbarsherlock.view.MenuItem item) {
@@ -111,7 +115,7 @@ public class MainActivity extends SherlockFragmentActivity implements
 			}
 			break;
 		}
-		case R.id.action_contact:
+		case R.id.Refresh:
 			// QuickContactFragment dialog = new QuickContactFragment();
 			// dialog.show(getSupportFragmentManager(), "QuickContactFragment");
 			// return true;

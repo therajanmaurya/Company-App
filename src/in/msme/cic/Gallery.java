@@ -1,6 +1,21 @@
 package in.msme.cic;
 
-import in.msme.cic.ImageLoader.ImageLoader;
+import in.msme.cic.adapter.AnimateFirstDisplayListener;
+import in.msme.cic.adapter.Holder;
+
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Random;
+
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer;
+import com.nostra13.universalimageloader.core.display.RoundedBitmapDisplayer;
+import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
+import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
@@ -11,12 +26,17 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.View.OnTouchListener;
 import android.widget.AbsListView;
 import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.AbsListView.OnScrollListener;
@@ -24,13 +44,9 @@ import android.widget.ListView;
 
 public class Gallery extends Fragment {
 
-	private ListView listViewLeft;
-	private ListView listViewRight;
-	private ItemsAdapter leftAdapter;
-	private ItemsAdapter rightAdapter;
-
-	int[] leftViewsHeights;
-	int[] rightViewsHeights;
+	
+	Context context;
+	static DisplayImageOptions options;
 
 	private static final String ARG_SECTION_NUMBER = "section_number";
 
@@ -50,259 +66,183 @@ public class Gallery extends Fragment {
 			Bundle savedInstanceState) {
 		View V = inflater.inflate(R.layout.fragment_gallery, container, false);
 
-		listViewLeft = (ListView) V.findViewById(R.id.list_view_left);
-		listViewRight = (ListView) V.findViewById(R.id.list_view_right);
+		DisplayImageOptions displayimageOptions = new DisplayImageOptions.Builder()
+				.cacheInMemory().cacheOnDisc().build();
 
-		loadItems();
+		// Create global configuration and initialize ImageLoader with this
+		// configuration
+		ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(
+				getActivity().getApplicationContext())
+				.defaultDisplayImageOptions(displayimageOptions).build();
+		ImageLoader.getInstance().init(config);
+		Button refresh = (Button) V.findViewById(R.id.ref);
+		ListView left = (ListView) V.findViewById(R.id.left_list);
+		ListView right = (ListView) V.findViewById(R.id.right_list);
+		options = new DisplayImageOptions.Builder()
+				.showImageOnLoading(R.drawable.image1)
+				.showImageForEmptyUri(R.drawable.image2)
+				.showImageOnFail(R.drawable.image3).cacheInMemory(true)
+				.cacheOnDisk(true).considerExifParams(true)
+				.displayer(new RoundedBitmapDisplayer(20)).build();
+		final adapterr Adapterr = new adapterr(context, options, getActivity());
+		left.setAdapter(Adapterr);
+		right.setAdapter(Adapterr);
 
-		// listViewLeft.setOnTouchListener(touchListener);
-		// listViewRight.setOnTouchListener(touchListener);
-		// listViewLeft.setOnScrollListener(scrollListener);
-		// listViewRight.setOnScrollListener(scrollListener);
+		refresh.setOnClickListener(new View.OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				// Adapterr.imageLoader.clearCache();
+				Adapterr.notifyDataSetChanged();
+			}
+		});
+
 		return V;
-	}
-
-	// Passing the touch event to the opposite list
-	@SuppressLint("ClickableViewAccessibility")
-	/*OnTouchListener touchListener = new OnTouchListener() {
-		boolean dispatched = false;
-
-		@Override
-		public boolean onTouch(View v, MotionEvent event) {
-			if (v.equals(listViewLeft) && !dispatched) {
-				dispatched = true;
-				listViewRight.dispatchTouchEvent(event);
-			} else if (v.equals(listViewRight) && !dispatched) {
-				dispatched = true;
-				listViewLeft.dispatchTouchEvent(event);
-			}
-
-			dispatched = false;
-			return false;
-		}
-	};*/
-
-	/**
-	 * Synchronizing scrolling Distance from the top of the first visible
-	 * element opposite list: sum_heights(opposite invisible screens) -
-	 * sum_heights(invisible screens) + distance from top of the first visible
-	 * child
-	 */
-	/*OnScrollListener scrollListener = new OnScrollListener() {
-
-		@Override
-		public void onScrollStateChanged(AbsListView v, int scrollState) {
-		}
-
-		@Override
-		public void onScroll(AbsListView view, int firstVisibleItem,
-				int visibleItemCount, int totalItemCount) {
-
-			if (view.getChildAt(0) != null) {
-				if (view.equals(listViewLeft)) {
-					leftViewsHeights[view.getFirstVisiblePosition()] = view
-							.getChildAt(0).getHeight();
-
-					int h = 0;
-					for (int i = 0; i < listViewRight.getFirstVisiblePosition(); i++) {
-						h += rightViewsHeights[i];
-					}
-
-					int hi = 0;
-					for (int i = 0; i < listViewLeft.getFirstVisiblePosition(); i++) {
-						hi += leftViewsHeights[i];
-					}
-
-					int top = h - hi + view.getChildAt(0).getTop();
-					listViewRight.setSelectionFromTop(
-							listViewRight.getFirstVisiblePosition(), top);
-				} else if (view.equals(listViewRight)) {
-					rightViewsHeights[view.getFirstVisiblePosition()] = view
-							.getChildAt(0).getHeight();
-
-					int h = 0;
-					for (int i = 0; i < listViewLeft.getFirstVisiblePosition(); i++) {
-						h += leftViewsHeights[i];
-					}
-
-					int hi = 0;
-					for (int i = 0; i < listViewRight.getFirstVisiblePosition(); i++) {
-						hi += rightViewsHeights[i];
-					}
-
-					int top = h - hi + view.getChildAt(0).getTop();
-					listViewLeft.setSelectionFromTop(
-							listViewLeft.getFirstVisiblePosition(), top);
-				}
-
-			}
-
-		}
-	};*/
-
-	private void loadItems() {
-		Integer[] leftItems = new Integer[] { R.drawable.iam3, R.drawable.iam4,
-				R.drawable.iamsme, R.drawable.iam2, R.drawable.iam5,
-				R.drawable.iam6, R.drawable.iam7, R.drawable.iam8,
-				R.drawable.iam9, R.drawable.iam10, R.drawable.iam11,
-				R.drawable.iam12, R.drawable.iam13, R.drawable.iam18,
-				R.drawable.iam19, R.drawable.iam20, R.drawable.iam21,
-				R.drawable.iam22, R.drawable.iam23, R.drawable.iam24,
-				R.drawable.iam25, R.drawable.iam26, R.drawable.iam27,
-				R.drawable.iam28, R.drawable.iam29, R.drawable.iam30,
-				R.drawable.iam31, R.drawable.iam32, R.drawable.iam33,
-				R.drawable.iam34, R.drawable.iam35, R.drawable.iam36,
-				R.drawable.iam37, R.drawable.iam38, R.drawable.iam39,
-				R.drawable.iam40, R.drawable.iam41, R.drawable.iam42,
-				R.drawable.iam43, R.drawable.iam44, R.drawable.iam45,
-				R.drawable.iam46, R.drawable.iam47, R.drawable.iam48,
-				R.drawable.iam49, R.drawable.iam50, R.drawable.iam51,
-				R.drawable.iam52, R.drawable.iam53, R.drawable.iam54,
-				R.drawable.iam55, R.drawable.iam56, R.drawable.iam57,
-				R.drawable.iam58, R.drawable.iam59, R.drawable.iam60 };
-		Integer[] rightItems = new Integer[] { R.drawable.iam61,
-				R.drawable.iam62, R.drawable.iam63, R.drawable.iam64,
-				R.drawable.iam65, R.drawable.iam66, R.drawable.iam67,
-				R.drawable.iam68, R.drawable.iam69, R.drawable.iam70,
-				R.drawable.iam71, R.drawable.iam72, R.drawable.iam73,
-				R.drawable.iam74, R.drawable.iam75, R.drawable.iam76,
-				R.drawable.iam77, R.drawable.iam78, R.drawable.iam79,
-				R.drawable.iam80, R.drawable.iam81, R.drawable.iam82,
-				R.drawable.iam83, R.drawable.iam84, R.drawable.iam85,
-				R.drawable.iam86, R.drawable.iam87, R.drawable.iam88,
-				R.drawable.iam89, R.drawable.iam90, R.drawable.iam91,
-				R.drawable.iam92, R.drawable.iam93, R.drawable.iam94,
-				R.drawable.iam95, R.drawable.iam96, R.drawable.iam97,
-				R.drawable.iam98, R.drawable.iam99, R.drawable.iam100,
-				R.drawable.iam101, R.drawable.iam102, R.drawable.iam103,
-				R.drawable.iam104, R.drawable.iam105, R.drawable.iam106,
-				R.drawable.iam107, R.drawable.iam108, R.drawable.iam109,
-				R.drawable.iam110, R.drawable.iam111, R.drawable.iam112,
-				R.drawable.iam113, R.drawable.iam114, R.drawable.iam115,
-				R.drawable.iam116, R.drawable.iam117, R.drawable.iam118,
-				R.drawable.iam119, R.drawable.iam120, R.drawable.iam121 };
-
-		leftAdapter = new ItemsAdapter(getActivity(), R.layout.staggereditem,
-				leftItems, mStrings);
-		rightAdapter = new ItemsAdapter(getActivity(), R.layout.staggereditem,
-				rightItems, mStrings);
-		listViewLeft.setAdapter(leftAdapter);
-		listViewRight.setAdapter(rightAdapter);
-
-		leftViewsHeights = new int[leftItems.length];
-		rightViewsHeights = new int[rightItems.length];
 
 	}
 
-	private String[] mStrings = {
-			"http://androidexample.com/media/webservice/LazyListView_images/image0.png",
-			"http://androidexample.com/media/webservice/LazyListView_images/image1.png",
-			"http://androidexample.com/media/webservice/LazyListView_images/image2.png",
-			"http://androidexample.com/media/webservice/LazyListView_images/image3.png",
-			"http://androidexample.com/media/webservice/LazyListView_images/image4.png",
-			"http://androidexample.com/media/webservice/LazyListView_images/image5.png",
-			"http://androidexample.com/media/webservice/LazyListView_images/image6.png",
-			"http://androidexample.com/media/webservice/LazyListView_images/image7.png",
-			"http://androidexample.com/media/webservice/LazyListView_images/image8.png",
-			"http://androidexample.com/media/webservice/LazyListView_images/image9.png",
-			"http://androidexample.com/media/webservice/LazyListView_images/image10.png",
-			"http://androidexample.com/media/webservice/LazyListView_images/image0.png",
-			"http://androidexample.com/media/webservice/LazyListView_images/image1.png",
-			"http://androidexample.com/media/webservice/LazyListView_images/image2.png",
-			"http://androidexample.com/media/webservice/LazyListView_images/image3.png",
-			"http://androidexample.com/media/webservice/LazyListView_images/image4.png",
-			"http://androidexample.com/media/webservice/LazyListView_images/image5.png",
-			"http://androidexample.com/media/webservice/LazyListView_images/image6.png",
-			"http://androidexample.com/media/webservice/LazyListView_images/image7.png",
-			"http://androidexample.com/media/webservice/LazyListView_images/image8.png",
-			"http://androidexample.com/media/webservice/LazyListView_images/image9.png",
-			"http://androidexample.com/media/webservice/LazyListView_images/image10.png",
-			"http://androidexample.com/media/webservice/LazyListView_images/image0.png",
-			"http://androidexample.com/media/webservice/LazyListView_images/image1.png",
-			"http://androidexample.com/media/webservice/LazyListView_images/image2.png",
-			"http://androidexample.com/media/webservice/LazyListView_images/image3.png",
-			"http://androidexample.com/media/webservice/LazyListView_images/image4.png",
-			"http://androidexample.com/media/webservice/LazyListView_images/image5.png",
-			"http://androidexample.com/media/webservice/LazyListView_images/image6.png",
-			"http://androidexample.com/media/webservice/LazyListView_images/image7.png",
-			"http://androidexample.com/media/webservice/LazyListView_images/image8.png",
-			"http://androidexample.com/media/webservice/LazyListView_images/image9.png",
-			"http://androidexample.com/media/webservice/LazyListView_images/image10.png"
-
-	};
-}
-
-class ItemsAdapter extends ArrayAdapter<Integer> {
-
-	
-	Context context;
-	LayoutInflater inflater;
-	int layoutResourceId;
-	float imageWidth;
-	String[] data;
-	public ImageLoader imageLoader;
-
-	public ItemsAdapter(Context context, int layoutResourceId, Integer[] items,
-			String[] mStrings) {
-		super(context, layoutResourceId, items);
-		this.context = context;
-		data = mStrings;
-		this.layoutResourceId = layoutResourceId;
-
-		float width = ((Activity) context).getWindowManager()
-				.getDefaultDisplay().getWidth();
-		float margin = (int) convertDpToPixel(10f, (Activity) context);
-		// two images, three margins of 10dips
-		imageWidth = ((width - (3 * margin)) / 2);
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu items for use in the action bar
+		MenuInflater inflater = getActivity().getMenuInflater();
+		inflater.inflate(R.menu.main, menu);
+		return true;
 	}
 
 	@Override
-	public View getView(int position, View convertView, ViewGroup parent) {
-		FrameLayout row = (FrameLayout) convertView;
-		ItemHolder holder;
-		Integer item = getItem(position);
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// TODO Auto-generated method stub
+		switch (item.getItemId()) {
+		case R.id.Refresh:
 
-		if (row == null) {
-			holder = new ItemHolder();
-			inflater = (LayoutInflater) context
-					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			row = (FrameLayout) inflater.inflate(layoutResourceId, parent,
-					false);
-			ImageView itemImage = (ImageView) row.findViewById(R.id.item_image);
-			holder.itemImage = itemImage;
-		} else {
-			holder = (ItemHolder) row.getTag();
+			return true;
+
 		}
-	    ImageView image = holder.itemImage;
-		row.setTag(holder);
-	    //imageLoader.DisplayImage(data[position], image);
-		setImageBitmap(item, holder.itemImage);
-		return row;
+
+		return super.onOptionsItemSelected(item);
+	}
+}
+
+@SuppressLint("ViewHolder")
+class adapterr extends BaseAdapter {
+
+	private Activity activity;
+
+	private static LayoutInflater inflater = null;
+
+	float imageWidth;
+	Context context;
+	@SuppressLint("NewApi")
+	protected ImageLoader imageloder = ImageLoader.getInstance();
+	private ImageLoadingListener animateFirstListener = new AnimateFirstDisplayListener();
+	DisplayImageOptions option;
+	public static final String[] IMAGES = new String[] {
+			// Heavy images
+			"http://iamsmeofindia.com/sites/default/files/3_2.jpg",
+			"http://iamsmeofindia.com/sites/default/files/4_2.jpg",
+			"http://iamsmeofindia.com/sites/default/files/2_2.jpg",
+			"http://iamsmeofindia.com/sites/default/files/1_2.jpg",
+			"http://iamsmeofindia.com/sites/default/files/13_0.jpg",
+			"http://iamsmeofindia.com/sites/default/files/11_2.jpg",
+			"http://iamsmeofindia.com/sites/default/files/14_0.jpg",
+			"http://iamsmeofindia.com/sites/default/files/12_0.jpg",
+			"http://www.frenchrevolutionfood.com/wp-content/uploads/2009/04/Twitter-Bird.png",
+			"http://3.bp.blogspot.com/-ka5MiRGJ_S4/TdD9OoF6bmI/AAAAAAAAE8k/7ydKtptUtSg/s1600/Google_Sky%2BMaps_Android.png",
+			"http://www.desiredsoft.com/images/icon_webhosting.png",
+			"http://goodereader.com/apps/wp-content/uploads/downloads/thumbnails/2012/01/hi-256-0-99dda8c730196ab93c67f0659d5b8489abdeb977.png",
+			"http://1.bp.blogspot.com/-mlaJ4p_3rBU/TdD9OWxN8II/AAAAAAAAE8U/xyynWwr3_4Q/s1600/antivitus_free.png",
+			"http://cdn3.iconfinder.com/data/icons/transformers/computer.png",
+			"http://cdn.geekwire.com/wp-content/uploads/2011/04/firefox.png?7794fe",
+			"https://ssl.gstatic.com/android/market/com.rovio.angrybirdsseasons/hi-256-9-347dae230614238a639d21508ae492302340b2ba",
+			"http://androidblaze.com/wp-content/uploads/2011/12/tablet-pc-256x256.jpg",
+			"http://www.theblaze.com/wp-content/uploads/2011/08/Apple.png",
+			"http://1.bp.blogspot.com/-y-HQwQ4Kuu0/TdD9_iKIY7I/AAAAAAAAE88/3G4xiclDZD0/s1600/Twitter_Android.png",
+			"http://3.bp.blogspot.com/-nAf4IMJGpc8/TdD9OGNUHHI/AAAAAAAAE8E/VM9yU_lIgZ4/s1600/Adobe%2BReader_Android.png",
+			"http://cdn.geekwire.com/wp-content/uploads/2011/05/oovoo-android.png?7794fe",
+			"http://icons.iconarchive.com/icons/kocco/ndroid/128/android-market-2-icon.png",
+			"http://thecustomizewindows.com/wp-content/uploads/2011/11/Nicest-Android-Live-Wallpapers.png",
+			"http://c.wrzuta.pl/wm16596/a32f1a47002ab3a949afeb4f",
+			"http://macprovid.vo.llnwd.net/o43/hub/media/1090/6882/01_headline_Muse.jpg",
+
+	};
+
+	public adapterr(Context context, DisplayImageOptions options, Activity a) {
+		activity = a;
+		inflater = (LayoutInflater) activity
+				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		option = options;
+		// Create ImageLoader object to download and show image in list
+		// Call ImageLoader constructor to initialize FileCache
+
 	}
 
-	public static class ItemHolder {
-		ImageView itemImage;
+	@Override
+	public int getCount() {
+		// TODO Auto-generated method stub
+		return IMAGES.length;
 	}
 
-	// resize the image proportionately so it fits the entire space
-	private void setImageBitmap(Integer item, ImageView imageView) {
-		Bitmap bitmap = BitmapFactory.decodeResource(getContext()
-				.getResources(), item);
-		float i = ((float) imageWidth) / ((float) bitmap.getWidth());
-		float imageHeight = i * (bitmap.getHeight());
-		FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) imageView
-				.getLayoutParams();
-		params.height = (int) imageHeight;
-		params.width = (int) imageWidth;
-		imageView.setLayoutParams(params);
-		imageView.setImageResource(item);
+	@Override
+	public Object getItem(int position) {
+		// TODO Auto-generated method stub
+		return position;
 	}
 
-	public static float convertDpToPixel(float dp, Context context) {
-		Resources resources = context.getResources();
-		DisplayMetrics metrics = resources.getDisplayMetrics();
-		float px = dp * (metrics.densityDpi / 160f);
-		return px;
+	@Override
+	public long getItemId(int position) {
+		// TODO Auto-generated method stub
+		return position;
+	}
+
+	public class Holder {
+		ImageView image;
+
+	}
+
+	@SuppressLint("InflateParams")
+	@Override
+	public View getView(int position, View v, ViewGroup arg2) {
+		// TODO Auto-generated method stub
+		v = inflater.inflate(R.layout.downloaditem, null);
+		Holder holder = new Holder();
+		int[] no = { 250, 200, 238, 265, 280 };
+		holder.image = (ImageView) v.findViewById(R.id.imageitem);
+		holder.image.setMaxHeight(1000);
+		v.setTag(holder);
+		int rnd = new Random().nextInt(no.length);
+		int number = no[rnd];
+		if (position == 0) {
+			holder.image.getLayoutParams().height = 400;
+		} else {
+			holder.image.getLayoutParams().height = number;
+		}
+
+		ImageView image = holder.image;
+
+		imageloder.displayImage(IMAGES[position], holder.image, option,
+				animateFirstListener);
+
+		return v;
+	}
+
+	public static class AnimateFirstDisplayListener extends
+			SimpleImageLoadingListener {
+
+		static final List<String> displayedImages = Collections
+				.synchronizedList(new LinkedList<String>());
+
+		@Override
+		public void onLoadingComplete(String imageUri, View view,
+				Bitmap loadedImage) {
+			if (loadedImage != null) {
+				ImageView imageView = (ImageView) view;
+				boolean firstDisplay = !displayedImages.contains(imageUri);
+				if (firstDisplay) {
+					FadeInBitmapDisplayer.animate(imageView, 500);
+					displayedImages.add(imageUri);
+				}
+			}
+		}
 	}
 
 }
