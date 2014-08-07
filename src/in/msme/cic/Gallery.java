@@ -1,8 +1,5 @@
 package in.msme.cic;
 
-import in.msme.cic.adapter.AnimateFirstDisplayListener;
-import in.msme.cic.adapter.Holder;
-
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -19,27 +16,18 @@ import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListene
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.View.OnTouchListener;
-import android.widget.AbsListView;
-import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.AbsListView.OnScrollListener;
 import android.widget.ListView;
 
 public class Gallery extends Fragment {
@@ -47,6 +35,7 @@ public class Gallery extends Fragment {
 	
 	Context context;
 	static DisplayImageOptions options;
+	protected ImageLoader imageLoader = ImageLoader.getInstance();
 
 	private static final String ARG_SECTION_NUMBER = "section_number";
 
@@ -80,8 +69,8 @@ public class Gallery extends Fragment {
 		ListView right = (ListView) V.findViewById(R.id.right_list);
 		options = new DisplayImageOptions.Builder()
 				.showImageOnLoading(R.drawable.image1)
-				.showImageForEmptyUri(R.drawable.image2)
-				.showImageOnFail(R.drawable.image3).cacheInMemory(true)
+				.showImageForEmptyUri(R.drawable.image1)
+				.showImageOnFail(R.drawable.image1).cacheInMemory(true)
 				.cacheOnDisk(true).considerExifParams(true)
 				.displayer(new RoundedBitmapDisplayer(20)).build();
 		final adapterr Adapterr = new adapterr(context, options, getActivity());
@@ -93,7 +82,8 @@ public class Gallery extends Fragment {
 			@Override
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
-				// Adapterr.imageLoader.clearCache();
+				imageLoader.clearMemoryCache();
+				imageLoader.clearDiscCache();
 				Adapterr.notifyDataSetChanged();
 			}
 		});

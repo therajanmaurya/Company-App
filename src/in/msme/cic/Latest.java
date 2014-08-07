@@ -1,54 +1,46 @@
 package in.msme.cic;
 
-import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 
-import com.actionbarsherlock.app.SherlockFragment;
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer;
+import com.nostra13.universalimageloader.core.display.RoundedBitmapDisplayer;
+import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
+import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 
-import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
-import android.app.Fragment;
 import android.content.Context;
-import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.BaseAdapter;
+import android.widget.BaseExpandableListAdapter;
 import android.widget.Button;
+import android.widget.ExpandableListView;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
 
 @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-public class Latest extends SherlockFragment {
+public class Latest extends Fragment {
 
-	ArrayList<String> urlf = new ArrayList<String>();
-	String[] url = {
-			"http://iamsmeofindia.com/services/credit-facilitation-centre",
-			"http://iamsmeofindia.com/services/i-tree",
-			"http://iamsmeofindia.com/siti-centre",
-			"http://iamsmeofindia.com/services/energy-efficiency",
-			"http://iamsmeofindia.com/services/innovation-cluster" };
-
-	ListView listservice;
-	WebView web;
-	Context context;
-	Button bac;
 	private static final String ARG_SECTION_NUMBER = "section_number";
-	public static int[] prgmImages = { R.drawable.service1,
-			R.drawable.service2, R.drawable.service3, R.drawable.service4,
-			R.drawable.service5 };
-	public static String[] prgmNameList = { "CREDIT FACILITATION CENTRE",
-			"I TREE", "SITI CENTRE", "ENERGY EFFICIENCY", "INNOVATION CLUSTER" };
+	public static final Integer[] images = { R.drawable.image1,
+			R.drawable.image2, R.drawable.image3, R.drawable.image4
 
-	serviceadapter adapter;
+	};
+	Context contaxt;
+	static DisplayImageOptions options;
+	protected ImageLoader imageLoader = ImageLoader.getInstance();
 
 	public static Latest newInstance(int sectionNumber) {
 		Latest fragment = new Latest();
@@ -61,78 +53,45 @@ public class Latest extends SherlockFragment {
 	public Latest() {
 	}
 
-	@SuppressLint("SetJavaScriptEnabled")
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		View V = inflater.inflate(R.layout.fragment_latest, container, false);
-		listservice = (ListView) V.findViewById(R.id.servicelist);
-		web = (WebView) V.findViewById(R.id.webView1);
-		adapter = new serviceadapter(getActivity(), prgmNameList, prgmImages);
-		listservice.setAdapter(adapter);
-		urlf.add(url[0]);
-		urlf.add(url[1]);
-		urlf.add(url[2]);
-		urlf.add(url[3]);
-		urlf.add(url[4]);
-		listservice.setOnItemClickListener(new OnItemClickListener() {
-			@Override
-			public void onItemClick(AdapterView<?> adapter, View view,
-					int position, long arg) {
 
-				listservice.setVisibility(View.GONE);
+		@SuppressWarnings("deprecation")
+		DisplayImageOptions displayimageOptions = new DisplayImageOptions.Builder()
+				.cacheInMemory().cacheOnDisc().build();
 
-				web.setVisibility(View.VISIBLE);
-				bac.setVisibility(View.VISIBLE);
-				WebSettings webSettings = web.getSettings();
-				webSettings.setJavaScriptEnabled(true);
-				web.loadUrl(url[position]);
-				web.getSettings().setLoadWithOverviewMode(true);
-				web.getSettings().setAppCacheEnabled(false);
-				webSettings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
-				web.getSettings().setCacheMode(position);
-				web.getSettings().setUseWideViewPort(true);
-				web.getSettings().setBuiltInZoomControls(true);
-				web.setWebViewClient(new WebViewClient() {
-					@Override
-					public boolean shouldOverrideUrlLoading(WebView view,
-							String url) {
-						view.loadUrl(url);
-						return true;
-					}
-				});
+		// Create global configuration and initialize ImageLoader with this
+		// configuration
+		ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(
+				getActivity().getApplicationContext())
+				.defaultDisplayImageOptions(displayimageOptions).build();
+		ImageLoader.getInstance().init(config);
 
-				SharedPreferences sharedPref = getActivity().getPreferences(
-						Context.MODE_PRIVATE);
-				SharedPreferences.Editor editor = sharedPref.edit();
-				editor.putString("url_link", url[position]);
-				editor.commit();
-				// Intent intent = new Intent(getActivity(), Webview.class);
-				// intent.putStringArrayListExtra("weburl", urlf);
-				// startActivity(intent);
-				/*
-				 * String url = "http://www.google.com"; Intent i = new
-				 * Intent(Intent.ACTION_VIEW); i.setData(Uri.parse(url));
-				 * startActivity(i);
-				 */
+		options = new DisplayImageOptions.Builder()
+				.showImageOnLoading(R.drawable.image1)
+				.showImageForEmptyUri(R.drawable.image1)
+				.showImageOnFail(R.drawable.image1).cacheInMemory(true)
+				.cacheOnDisk(true).considerExifParams(true)
+				.displayer(new RoundedBitmapDisplayer(20)).build();
 
-			}
-		});
-
-		bac = (Button) V.findViewById(R.id.back);
-		bac.setOnClickListener(new View.OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				// TODO Auto-generated method stub
-				listservice.setVisibility(View.VISIBLE);
-				web.setVisibility(View.GONE);
-				bac.setVisibility(View.INVISIBLE);
-			}
-		});
+		ExpandableListView expand = (ExpandableListView) V
+				.findViewById(R.id.Expandlist);
+		myAdapter adp = new myAdapter(getActivity(), options);
+		expand.setAdapter(adp);
 
 		return V;
 
+	}
+
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		if (keyCode == KeyEvent.KEYCODE_BACK)
+			// Toast.makeText(getApplicationContext(), "back press",
+			// Toast.LENGTH_LONG).show();
+
+			return false;
+		return false;
 	}
 
 	@Override
@@ -140,49 +99,84 @@ public class Latest extends SherlockFragment {
 		// TODO Auto-generated method stub
 		super.onOptionsMenuClosed(menu);
 	}
-    
+
 }
 
-@SuppressLint({ "ViewHolder", "InflateParams" })
-class latestadapter extends BaseAdapter {
-	String[] result;
+class myAdapter extends BaseExpandableListAdapter {
 	Context context;
-	int[] imageId;
-	private static LayoutInflater inflater = null;
+	Typeface type;
 
-	public static String[] subprgm = {
-			"A Memorandum of understanding \n (MoU) was signed between SIDBI \n and FSIA on 20th december 2008",
-			"iTree is innovative step towards skill \n  development wherein we fill skillgao \n  between the existing acadimic setup and industry",
-			"SITI centre is step in helping the MSME'S Identify \n new business opportunities , create efficencies, \n new products development , identify ne markets through innovation and know how ",
-			"iamsmeofindia  as a nodal agency is \n working towards making SME'S Energy efficient",
-			"National Innovation Council (NInC) has selected IAMSME \n of India to implement the Innovation \n Cluster for Auto Components in Faridabad." };
+	protected ImageLoader imageloder = ImageLoader.getInstance();
+	private ImageLoadingListener animateFirstListener = new AnimateFirstDisplayListener();
+	DisplayImageOptions option;
 
-	public latestadapter(Context services, String[] prgmNameList,
-			int[] prgmImages) {
+	protected LayoutInflater inflater = null;
+	static int[] image = { R.drawable.image1, R.drawable.image2,
+			R.drawable.image3, R.drawable.image4 };
+	static String[] parentlist = {
+			"Pai, Bala, Prahlad Ask Infosys to Buy Back Rs 11,000-Crore Shares",
+			"ViewPDF", "TODO List", "Contacts" };
+	static String[][] childlist = {
+			{ "Bangalore: Former Infosys top executives TV Mohandas Pai,V Balakrishnan and D N Prahlad have asked India's second largest software services firm to buy back shares worth Rs.11,200 crore, saying it will help check the asymmetry of information between management and investors.In a letter to Infosys board, the three former executives said there is a need to announce a large and consistent buyback programme to show confidence in the management and the business model " },
+			{ "ViewPDF list \n 1.Adobe Reader \n 2. PDF Reader \n 3.All PDF" },
+			{ "TODO list" }, { "Contacts list" } };
+
+	public myAdapter(Context context, DisplayImageOptions options) {
 		// TODO Auto-generated constructor stub
-		result = prgmNameList;
-		context = services;
-		imageId = prgmImages;
-		inflater = (LayoutInflater) context
-				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		this.context = context;
+		option = options;
+
+	}
+
+	public static final String[] IMAGES = new String[] {
+			// Heavy images
+			"http://i.ndtvimg.com/i/2014-04/infosys_295x200_81397539806.jpg",
+			"http://iamsmeofindia.com/sites/default/files/itree_page.jpg",
+			"http://iamsmeofindia.com/sites/default/files/siti-logo.png",
+			"http://iamsmeofindia.com/sites/default/files/energy.jpg",
+			"http://iamsmeofindia.com/sites/default/files/inovation.jpg", };
+
+	@Override
+	public int getGroupCount() {
+		// TODO Auto-generated method stub
+		return parentlist.length;
 	}
 
 	@Override
-	public int getCount() {
+	public int getChildrenCount(int groupPosition) {
 		// TODO Auto-generated method stub
-		return result.length;
+		return childlist[groupPosition].length;
 	}
 
 	@Override
-	public Object getItem(int position) {
+	public Object getGroup(int groupPosition) {
 		// TODO Auto-generated method stub
-		return position;
+		return groupPosition;
 	}
 
 	@Override
-	public long getItemId(int position) {
+	public Object getChild(int groupPosition, int childPosition) {
 		// TODO Auto-generated method stub
-		return position;
+
+		return 0;
+	}
+
+	@Override
+	public long getGroupId(int groupPosition) {
+		// TODO Auto-generated method stub
+		return groupPosition;
+	}
+
+	@Override
+	public long getChildId(int groupPosition, int childPosition) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public boolean hasStableIds() {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 	public class Holder {
@@ -190,31 +184,74 @@ class latestadapter extends BaseAdapter {
 		ImageView img;
 	}
 
-	@SuppressLint({ "ViewHolder", "InflateParams" })
 	@Override
-	public View getView(final int position, View convertView, ViewGroup parent) {
+	public View getGroupView(int groupPosition, boolean isExpanded,
+			View convertView, ViewGroup parent) {
 		// TODO Auto-generated method stub
-		Holder holder = new Holder();
-		View rowView;
-		rowView = inflater.inflate(R.layout.servicelistitem, null);
-
-		holder.tv = (TextView) rowView.findViewById(R.id.heading);
-		holder.tv1 = (TextView) rowView.findViewById(R.id.subhead);
-		holder.tv1.setHeight(50);
-		holder.tv1.setMinimumHeight(50);
-		holder.tv1.setText(subprgm[position]);
-		holder.img = (ImageView) rowView.findViewById(R.id.serviceimg);
-		holder.tv.setHeight(100);
-		holder.tv.setMinimumHeight(100);
-		holder.tv.setText(result[position]);
-		holder.img.setImageResource(imageId[position]);
-		/*
-		 * rowView.setOnClickListener(new OnClickListener() {
-		 * 
-		 * @Override public void onClick(View v) { // TODO Auto-generated method
-		 * stub Toast.makeText(context, "You Clicked " + result[position],
-		 * Toast.LENGTH_LONG).show(); } });
-		 */
-		return rowView;
+		if (convertView == null) {
+			LayoutInflater infalInflater = (LayoutInflater) this.context
+					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			convertView = infalInflater.inflate(R.layout.latestlistitem, null);
+		}
+		ImageView im = (ImageView) convertView.findViewById(R.id.latestimg);
+		TextView tv = (TextView) convertView.findViewById(R.id.latestheading);
+		imageloder.displayImage(IMAGES[groupPosition], im, option,
+				animateFirstListener);
+		tv.setText(parentlist[groupPosition]);
+		return convertView;
 	}
+
+	@Override
+	public View getChildView(int groupPosition, int childPosition,
+			boolean isLastChild, View convertView, ViewGroup parent) {
+		// TODO Auto-generated method stub
+		if (convertView == null) {
+			LayoutInflater infalInflater = (LayoutInflater) this.context
+					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			convertView = infalInflater.inflate(R.layout.childlist, null);
+		}
+
+		Button more = (Button) convertView.findViewById(R.id.more);
+		final TextView des = (TextView) convertView
+				.findViewById(R.id.textViewChild);
+		des.setText(childlist[groupPosition][childPosition]);
+		des.setTextSize(20);
+		more.setOnClickListener(new View.OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				des.setTextSize(40);
+			}
+		});
+		return convertView;
+
+	}
+
+	@Override
+	public boolean isChildSelectable(int groupPosition, int childPosition) {
+		// TODO Auto-generated method stub
+		return true;
+	}
+
+	public static class AnimateFirstDisplayListener extends
+			SimpleImageLoadingListener {
+
+		static final List<String> displayedImages = Collections
+				.synchronizedList(new LinkedList<String>());
+
+		@Override
+		public void onLoadingComplete(String imageUri, View view,
+				Bitmap loadedImage) {
+			if (loadedImage != null) {
+				ImageView imageView = (ImageView) view;
+				boolean firstDisplay = !displayedImages.contains(imageUri);
+				if (firstDisplay) {
+					FadeInBitmapDisplayer.animate(imageView, 500);
+					displayedImages.add(imageUri);
+				}
+			}
+		}
+	}
+
 }
