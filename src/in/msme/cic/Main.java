@@ -38,9 +38,9 @@ public class Main extends Fragment {
 
 		View V = inflater.inflate(R.layout.facebook, container, false);
 
-		WebView cardapio = (WebView) V.findViewById(R.id.webView1);
-		cardapio.getSettings().setJavaScriptEnabled(true);
-		cardapio.loadUrl("https://www.facebook.com");
+//		WebView cardapio = (WebView) V.findViewById(R.id.webView1);
+//		cardapio.getSettings().setJavaScriptEnabled(true);
+//		cardapio.loadUrl("https://www.facebook.com");
 		return V;
 
 	}

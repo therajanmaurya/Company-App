@@ -1,8 +1,14 @@
 package in.msme.cic;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -13,12 +19,15 @@ import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
 import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 
 import android.annotation.TargetApi;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -29,18 +38,45 @@ import android.widget.Button;
 import android.widget.ExpandableListView;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 @TargetApi(Build.VERSION_CODES.HONEYCOMB)
 public class Latest extends Fragment {
 
 	private static final String ARG_SECTION_NUMBER = "section_number";
-	public static final Integer[] images = { R.drawable.image1,
-			R.drawable.image2, R.drawable.image3, R.drawable.image4
-
-	};
-	Context contaxt;
+	Context context;
 	static DisplayImageOptions options;
 	protected ImageLoader imageLoader = ImageLoader.getInstance();
+
+	ProgressDialog progress;
+	// URL to get contacts JSON
+	LatestAdapter adp;
+	ConnectionDetector cd;
+	Boolean isInternetPresent = false;
+	private static String urljson = "http://pa1pal.tk/LE.json";
+
+	// JSON Node names
+	private static final String TAG_Latest = "Latest";
+	private static final String TAG_TITLE = "Title";
+	private static final String TAG_Date = "Date";
+	private static final String TAG_Venue = "Venue";
+	private static final String TAG_Description = "Description";
+	private static final String TAG_ImageLink = "link";
+
+	// contacts JSONArray
+	JSONArray Latest = null;
+
+	// Hashmap for ListView
+	ArrayList<HashMap<String, String>> contactList;
+	ArrayList<String> TitleS = new ArrayList<String>();
+	ArrayList<String> DateS = new ArrayList<String>();
+	ArrayList<String> VenueS = new ArrayList<String>();
+	ArrayList<String> Ldesc = new ArrayList<String>();
+	ArrayList<String> ImageLink = new ArrayList<String>();
+
+	ExpandableListView expand;
+
+	ArrayList<String> urlf = new ArrayList<String>();
 
 	public static Latest newInstance(int sectionNumber) {
 		Latest fragment = new Latest();
@@ -57,31 +93,115 @@ public class Latest extends Fragment {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		View V = inflater.inflate(R.layout.fragment_latest, container, false);
+		cd = new ConnectionDetector(getActivity().getApplicationContext());
+		isInternetPresent = cd.isConnectingToInternet();
+		if(isInternetPresent){
+			 V = inflater.inflate(R.layout.fragment_latest, container, false);
+		}else{
+			V = inflater.inflate(R.layout.no_inetrnet, container, false);
+		}
+		
+		expand = (ExpandableListView) V.findViewById(R.id.Expandlist);
+		
+		contactList = new ArrayList<HashMap<String, String>>();
+		
 
-		@SuppressWarnings("deprecation")
-		DisplayImageOptions displayimageOptions = new DisplayImageOptions.Builder()
-				.cacheInMemory().cacheOnDisc().build();
+		if (isInternetPresent) {
+			GetContacts Ldata = new GetContacts();
+			Ldata.execute();
 
-		// Create global configuration and initialize ImageLoader with this
-		// configuration
-		ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(
-				getActivity().getApplicationContext())
-				.defaultDisplayImageOptions(displayimageOptions).build();
-		ImageLoader.getInstance().init(config);
-
-		options = new DisplayImageOptions.Builder()
-				.showImageOnLoading(R.drawable.image1)
-				.showImageForEmptyUri(R.drawable.image1)
-				.showImageOnFail(R.drawable.image1).cacheInMemory(true)
-				.cacheOnDisk(true).considerExifParams(true)
-				.displayer(new RoundedBitmapDisplayer(20)).build();
-
-		ExpandableListView expand = (ExpandableListView) V
-				.findViewById(R.id.Expandlist);
-		myAdapter adp = new myAdapter(getActivity(), options);
-		expand.setAdapter(adp);
+		} else {
+			
+			
+			
+//			ImageView noInternet = (ImageView)V.findViewById(R.id.Nointernet);
+//			noInternet.setVisibility(View.VISIBLE);
+//			noInternet.setImageDrawable(getResources().getDrawable(R.drawable.no_internet));
+//			Button ref = (Button)V.findViewById(R.id.ref);
+//			ref.setVisibility(View.GONE);
+//			Toast.makeText(getActivity(), "Please Connect To Internet Connection", Toast.LENGTH_LONG).show();
+			
+		}
 
 		return V;
+
+	}
+
+	private class GetContacts extends AsyncTask<Void, Void, Void> {
+
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+			progress = ProgressDialog.show(getActivity(),
+					"Fetching Latest News", "Wait ........", true);
+
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		protected Void doInBackground(Void... arg0) {
+			ServiceHandler sh = new ServiceHandler();
+
+			String jsonStr = sh.makeServiceCall(urljson, ServiceHandler.GET);
+
+			Log.d("Response: ", "> " + jsonStr);
+
+			if (jsonStr != null) {
+				try {
+					JSONObject jsonObj = new JSONObject(jsonStr);
+
+					// Getting JSON Array node
+					Latest = jsonObj.getJSONArray(TAG_Latest);
+
+					for (int i = 0; i < Latest.length(); i++) {
+						JSONObject c = Latest.getJSONObject(i);
+
+						String title = c.getString(TAG_TITLE);
+						String date = c.getString(TAG_Date);
+						String link = c.getString(TAG_Venue);
+						String description = c.getString(TAG_Description);
+						String imagelink = c.getString(TAG_ImageLink);
+
+						// tmp hashmap for single contact
+						HashMap<String, String> contact = new HashMap<String, String>();
+						TitleS.add(title);
+						DateS.add(date);
+						VenueS.add(link);
+						Ldesc.add(description);
+						ImageLink.add(imagelink);
+					}
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
+			} else {
+				Log.e("ServiceHandler", "Couldn't get any data from the url");
+			}
+
+			return null;
+		}
+
+		@SuppressWarnings("deprecation")
+		@Override
+		protected void onPostExecute(Void result) {
+			super.onPostExecute(result);
+			progress.dismiss();
+			DisplayImageOptions displayimageOptions = new DisplayImageOptions.Builder()
+					.cacheInMemory().cacheOnDisc().build();
+			ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(
+					getActivity().getApplicationContext())
+					.defaultDisplayImageOptions(displayimageOptions).build();
+			ImageLoader.getInstance().init(config);
+
+			options = new DisplayImageOptions.Builder()
+					.showImageOnLoading(R.drawable.image1)
+					.showImageForEmptyUri(R.drawable.image1)
+					.showImageOnFail(R.drawable.image1).cacheInMemory(true)
+					.cacheOnDisk(true).considerExifParams(true)
+					.displayer(new RoundedBitmapDisplayer(20)).build();
+			adp = new LatestAdapter(getActivity(), options, TitleS, DateS,
+					VenueS, Ldesc, ImageLink);
+			expand.setAdapter(adp);
+		}
 
 	}
 
@@ -102,7 +222,7 @@ public class Latest extends Fragment {
 
 }
 
-class myAdapter extends BaseExpandableListAdapter {
+class LatestAdapter extends BaseExpandableListAdapter {
 	Context context;
 	Typeface type;
 
@@ -110,42 +230,40 @@ class myAdapter extends BaseExpandableListAdapter {
 	private ImageLoadingListener animateFirstListener = new AnimateFirstDisplayListener();
 	DisplayImageOptions option;
 
-	protected LayoutInflater inflater = null;
-	static int[] image = { R.drawable.image1, R.drawable.image2,
-			R.drawable.image3, R.drawable.image4 };
-	static String[] parentlist = {
-			"Pai, Bala, Prahlad Ask Infosys to Buy Back Rs 11,000-Crore Shares",
-			"ViewPDF", "TODO List", "Contacts" };
-	static String[][] childlist = {
-			{ "Bangalore: Former Infosys top executives TV Mohandas Pai,V Balakrishnan and D N Prahlad have asked India's second largest software services firm to buy back shares worth Rs.11,200 crore, saying it will help check the asymmetry of information between management and investors.In a letter to Infosys board, the three former executives said there is a need to announce a large and consistent buyback programme to show confidence in the management and the business model " },
-			{ "ViewPDF list \n 1.Adobe Reader \n 2. PDF Reader \n 3.All PDF" },
-			{ "TODO list" }, { "Contacts list" } };
+	ArrayList<String> T = new ArrayList<String>();
+	ArrayList<String> D = new ArrayList<String>();
+	ArrayList<String> V = new ArrayList<String>();
+	ArrayList<String> desT = new ArrayList<String>();
+	ArrayList<String> Im_link = new ArrayList<String>();
 
-	public myAdapter(Context context, DisplayImageOptions options) {
+	protected LayoutInflater inflater = null;
+
+	public LatestAdapter(Context context, DisplayImageOptions options,
+			ArrayList<String> titleS, ArrayList<String> dateS,
+			ArrayList<String> venueS, ArrayList<String> ldesc,
+			ArrayList<String> imageLink) {
 		// TODO Auto-generated constructor stub
+		T = titleS;
+		D = dateS;
+		desT = ldesc;
+		V = venueS;
+		Im_link = imageLink;
+
 		this.context = context;
 		option = options;
 
 	}
 
-	public static final String[] IMAGES = new String[] {
-			// Heavy images
-			"http://i.ndtvimg.com/i/2014-04/infosys_295x200_81397539806.jpg",
-			"http://iamsmeofindia.com/sites/default/files/itree_page.jpg",
-			"http://iamsmeofindia.com/sites/default/files/siti-logo.png",
-			"http://iamsmeofindia.com/sites/default/files/energy.jpg",
-			"http://iamsmeofindia.com/sites/default/files/inovation.jpg", };
-
 	@Override
 	public int getGroupCount() {
 		// TODO Auto-generated method stub
-		return parentlist.length;
+		return 3;
 	}
 
 	@Override
 	public int getChildrenCount(int groupPosition) {
 		// TODO Auto-generated method stub
-		return childlist[groupPosition].length;
+		return 1;
 	}
 
 	@Override
@@ -195,9 +313,14 @@ class myAdapter extends BaseExpandableListAdapter {
 		}
 		ImageView im = (ImageView) convertView.findViewById(R.id.latestimg);
 		TextView tv = (TextView) convertView.findViewById(R.id.latestheading);
-		imageloder.displayImage(IMAGES[groupPosition], im, option,
+		TextView date = (TextView) convertView.findViewById(R.id.latestDate);
+		TextView venue = (TextView) convertView.findViewById(R.id.latestvenue);
+		imageloder.displayImage(Im_link.get(groupPosition), im, option,
 				animateFirstListener);
-		tv.setText(parentlist[groupPosition]);
+
+		tv.setText(T.get(groupPosition));
+		date.setText(D.get(groupPosition));
+		venue.setText(V.get(groupPosition));
 		return convertView;
 	}
 
@@ -211,19 +334,11 @@ class myAdapter extends BaseExpandableListAdapter {
 			convertView = infalInflater.inflate(R.layout.childlist, null);
 		}
 
-		Button more = (Button) convertView.findViewById(R.id.more);
 		final TextView des = (TextView) convertView
 				.findViewById(R.id.textViewChild);
-		des.setText(childlist[groupPosition][childPosition]);
-		des.setTextSize(20);
-		more.setOnClickListener(new View.OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				// TODO Auto-generated method stub
-				des.setTextSize(40);
-			}
-		});
+		des.setText(desT.get(groupPosition));
+		
+		 
 		return convertView;
 
 	}

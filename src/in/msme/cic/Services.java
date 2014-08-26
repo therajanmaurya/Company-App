@@ -2,26 +2,24 @@ package in.msme.cic;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
-import com.actionbarsherlock.app.SherlockFragment;
-import com.nostra13.universalimageloader.core.DisplayImageOptions;
-import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
-import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer;
-import com.nostra13.universalimageloader.core.display.RoundedBitmapDisplayer;
-import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
-import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
+import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
@@ -35,10 +33,45 @@ import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer;
+import com.nostra13.universalimageloader.core.display.RoundedBitmapDisplayer;
+import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
+import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 
 @TargetApi(Build.VERSION_CODES.HONEYCOMB)
 public class Services extends Fragment {
+
+	MySQLiteHelper db;
+	ProgressDialog progress;
+	// URL to get contacts JSO
+	private static String urljson = "http://pa1pal.tk/Services";
+    ProgressBar proBar;
+	ConnectionDetector cd;
+	Boolean isInternetPresent = false;
+    ImageView no ;
+	// JSON Node names
+	private static final String TAG_CONTACTS = "contacts";
+	private static final String TAG_TITLE = "Title";
+	private static final String TAG_Description = "Desc";
+	private static final String TAG_link = "link";
+
+	// contacts JSONArray
+	JSONArray contacts = null;
+
+	// Hashmap for ListView
+	ArrayList<HashMap<String, String>> contactList;
+	ArrayList<Service> services = new ArrayList<Service>();
+	ArrayList<String> TitleS = new ArrayList<String>();
+	ArrayList<String> DescS = new ArrayList<String>();
+	ArrayList<String> linkS = new ArrayList<String>();
+	String[] ti = null;
 
 	ArrayList<String> urlf = new ArrayList<String>();
 	String[] url = {
@@ -53,8 +86,6 @@ public class Services extends Fragment {
 	Context context;
 	Button bac;
 	private static final String ARG_SECTION_NUMBER = "section_number";
-	public static String[] prgmNameList = { "CREDIT FACILITATION CENTRE",
-			"I TREE", "SITI CENTRE", "ENERGY EFFICIENCY", "INNOVATION CLUSTER" };
 
 	static DisplayImageOptions options;
 	protected ImageLoader imageLoader = ImageLoader.getInstance();
@@ -77,17 +108,19 @@ public class Services extends Fragment {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		View V = inflater.inflate(R.layout.fragment_services, container, false);
-
+		proBar = (ProgressBar)V.findViewById(R.id.PService);
+		listservice = (ListView) V.findViewById(R.id.servicelist);
+		@SuppressWarnings("deprecation")
+	    
 		DisplayImageOptions displayimageOptions = new DisplayImageOptions.Builder()
 				.cacheInMemory().cacheOnDisc().build();
 
-		// Create global configuration and initialize ImageLoader with this
-		// configuration
 		ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(
 				getActivity().getApplicationContext())
 				.defaultDisplayImageOptions(displayimageOptions).build();
 		ImageLoader.getInstance().init(config);
-
+		context = getActivity().getApplicationContext();
+		db = new MySQLiteHelper(context);
 		options = new DisplayImageOptions.Builder()
 				.showImageOnLoading(R.drawable.image1)
 				.showImageForEmptyUri(R.drawable.image1)
@@ -95,10 +128,43 @@ public class Services extends Fragment {
 				.cacheOnDisk(true).considerExifParams(true)
 				.displayer(new RoundedBitmapDisplayer(20)).build();
 
-		listservice = (ListView) V.findViewById(R.id.servicelist);
+		cd = new ConnectionDetector(getActivity().getApplicationContext());
+		isInternetPresent = cd.isConnectingToInternet();
+
+		if (isInternetPresent) {
+			GetContacts data = new GetContacts();
+			data.execute();
+
+		} else {
+
+			Toast.makeText(getActivity(),
+					"Please Connect To Internet Connection", Toast.LENGTH_SHORT)
+					.show();
+			ArrayList<Service> sam = new ArrayList<Service>();
+			Log.e("tag", "working");
+			sam = db.getAllSevices();
+			Service readdata = null;
+
+			for (int i = 0; i < sam.size(); i++) {
+				String m1, m2, m3;
+				readdata = new Service();
+				readdata = sam.get(i);
+				m1 = readdata.getTitle();
+				m2 = readdata.getDes();
+				m3 = readdata.getImage_url();
+
+				TitleS.add(m1);
+				DescS.add(m2);
+				linkS.add(m3);
+				Log.e("tag", readdata.toString());
+				adapter = new serviceadapter(getActivity(), options, TitleS,
+						DescS, linkS);
+				listservice.setAdapter(adapter);
+			}
+
+		}
+        no  = (ImageView)V.findViewById(R.id.ima);
 		web = (WebView) V.findViewById(R.id.webView1);
-		adapter = new serviceadapter(getActivity(), prgmNameList, options);
-		listservice.setAdapter(adapter);
 		urlf.add(url[0]);
 		urlf.add(url[1]);
 		urlf.add(url[2]);
@@ -109,54 +175,136 @@ public class Services extends Fragment {
 			public void onItemClick(AdapterView<?> adapter, View view,
 					int position, long arg) {
 
-				listservice.setVisibility(View.GONE);
+				if(isInternetPresent){
+					
+					listservice.setVisibility(View.GONE);
 
-				web.setVisibility(View.VISIBLE);
-				bac.setVisibility(View.VISIBLE);
-				WebSettings webSettings = web.getSettings();
-				webSettings.setJavaScriptEnabled(true);
-				web.loadUrl(url[position]);
-				web.getSettings().setLoadWithOverviewMode(true);
-				web.getSettings().setAppCacheEnabled(false);
-				webSettings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
-				web.getSettings().setCacheMode(position);
-				web.getSettings().setUseWideViewPort(true);
-				web.getSettings().setBuiltInZoomControls(true);
-				web.setWebViewClient(new WebViewClient() {
-					@Override
-					public boolean shouldOverrideUrlLoading(WebView view,
-							String url) {
-						view.loadUrl(url);
-						return true;
-					}
-				});
-
-				SharedPreferences sharedPref = getActivity().getPreferences(
-						Context.MODE_PRIVATE);
-				SharedPreferences.Editor editor = sharedPref.edit();
-				editor.putString("url_link", url[position]);
-				editor.commit();
+					web.setVisibility(View.VISIBLE);
+					//bac.setVisibility(View.VISIBLE);
+					WebSettings webSettings = web.getSettings();
+					webSettings.setJavaScriptEnabled(true);
+					web.loadUrl(url[position]);
+					web.getSettings().setLoadWithOverviewMode(true);
+					web.getSettings().setAppCacheEnabled(false);
+					webSettings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
+					web.getSettings().setCacheMode(position);
+					web.getSettings().setUseWideViewPort(true);
+					web.getSettings().setBuiltInZoomControls(true);
+					web.setWebViewClient(new WebViewClient() {
+						@Override
+						public boolean shouldOverrideUrlLoading(WebView view,
+								String url) {
+							view.loadUrl(url);
+							return true;
+						}
+					});
+					
+				}else {
+					
+					listservice.setVisibility(View.GONE);
+					no.setVisibility(View.VISIBLE);
+					
+				}
+				
+				
 
 			}
 		});
-		
-		bac = (Button) V.findViewById(R.id.back);
-		bac.setOnClickListener(new View.OnClickListener() {
 
-			@Override
-			public void onClick(View v) {
-				// TODO Auto-generated method stub
-				listservice.setVisibility(View.VISIBLE);
-				web.setVisibility(View.GONE);
-				bac.setVisibility(View.INVISIBLE);
-			}
-		});
+//		bac = (Button) V.findViewById(R.id.back);
+//		bac.setOnClickListener(new View.OnClickListener() {
+//
+//			@Override
+//			public void onClick(View v) {
+//				// TODO Auto-generated method stub
+//				listservice.setVisibility(View.VISIBLE);
+//				web.setVisibility(View.GONE);
+//				bac.setVisibility(View.INVISIBLE);
+//			}
+//		});
 
 		return V;
 
 	}
-	
-	
+
+	private class GetContacts extends AsyncTask<Void, Void, Void> {
+
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+			proBar.setVisibility(View.VISIBLE);
+//			progress = ProgressDialog.show(getActivity(), "Fetching Services",
+//					"Wait ........", true);
+
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		protected Void doInBackground(Void... arg0) {
+			// Creating service handler class instance
+			ServiceHandler sh = new ServiceHandler();
+
+			// Making a request to url and getting response
+			String jsonStr = sh.makeServiceCall(urljson, ServiceHandler.GET);
+
+			Log.d("Response: ", "> " + jsonStr);
+
+			if (jsonStr != null) {
+				try {
+					JSONObject jsonObj = new JSONObject(jsonStr);
+					context.deleteDatabase("SevicesDB");
+					contacts = jsonObj.getJSONArray(TAG_CONTACTS);
+					Service ser = null;
+					for (int i = 0; i < contacts.length(); i++) {
+						JSONObject c = contacts.getJSONObject(i);
+						ser = new Service();
+						ser.setTitle(c.getString(TAG_TITLE));
+						ser.setDes(c.getString(TAG_Description));
+						ser.setImage_url(c.getString(TAG_link));
+						db.addService(ser);
+						// services.add(ser);
+					}
+					Log.e("where", "skdfnsdjkgnfjksdng");
+
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
+			} else {
+				Log.e("ServiceHandler", "Couldn't get any data from the url");
+			}
+
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(Void result) {
+			super.onPostExecute(result);
+			proBar.setVisibility(View.GONE);
+			//progress.dismiss();
+			ArrayList<Service> sam = new ArrayList<Service>();
+			Log.e("tag", "working");
+			sam = db.getAllSevices();
+			Service sagar = null;
+
+			for (int i = 0; i < sam.size(); i++) {
+				String m1, m2, m3;
+				sagar = new Service();
+				sagar = sam.get(i);
+				m1 = sagar.getTitle();
+				m2 = sagar.getDes();
+				m3 = sagar.getImage_url();
+
+				TitleS.add(m1);
+				DescS.add(m2);
+				linkS.add(m3);
+				Log.e("tag", sagar.toString());
+			}
+			adapter = new serviceadapter(getActivity(), options, TitleS, DescS,
+					linkS);
+			listservice.setAdapter(adapter);
+		}
+
+	}
 
 	@Override
 	public void onOptionsMenuClosed(Menu menu) {
@@ -171,6 +319,9 @@ class serviceadapter extends BaseAdapter {
 	String[] result;
 	Context context;
 	int[] imageId;
+	ArrayList<String> TitleSe = new ArrayList<String>();
+	ArrayList<String> DescSe = new ArrayList<String>();
+	ArrayList<String> linkSe = new ArrayList<String>();
 	private static LayoutInflater inflater = null;
 
 	protected ImageLoader imageloder = ImageLoader.getInstance();
@@ -183,28 +334,24 @@ class serviceadapter extends BaseAdapter {
 			"iamsmeofindia  as a nodal agency is \n working towards making SME'S Energy efficient",
 			"National Innovation Council (NInC) has selected IAMSME \n of India to implement the Innovation \n Cluster for Auto Components in Faridabad." };
 
-	public serviceadapter(Context services, String[] prgmNameList,
-			DisplayImageOptions options) {
+	public serviceadapter(Context services, DisplayImageOptions options,
+			ArrayList<String> titleS, ArrayList<String> descS,
+			ArrayList<String> linkS) {
 		// TODO Auto-generated constructor stub
-		result = prgmNameList;
 		context = services;
 		option = options;
+		TitleSe = titleS;
+		DescSe = descS;
+		linkSe = linkS;
 		inflater = (LayoutInflater) context
 				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 	}
 
-	public static final String[] IMAGES = new String[] {
-			// Heavy images
-			"http://iamsmeofindia.com/sites/default/files/SIDBI_FSIA-pic1.jpg",
-			"http://iamsmeofindia.com/sites/default/files/itree_page.jpg",
-			"http://iamsmeofindia.com/sites/default/files/siti-logo.png",
-			"http://iamsmeofindia.com/sites/default/files/energy.jpg",
-			"http://iamsmeofindia.com/sites/default/files/inovation.jpg", };
 
 	@Override
 	public int getCount() {
 		// TODO Auto-generated method stub
-		return result.length;
+		return TitleSe.size();
 	}
 
 	@Override
@@ -236,24 +383,22 @@ class serviceadapter extends BaseAdapter {
 		holder.tv1 = (TextView) rowView.findViewById(R.id.subhead);
 		holder.tv1.setHeight(50);
 		holder.tv1.setMinimumHeight(50);
-		holder.tv1.setText(subprgm[position]);
+
 		holder.img = (ImageView) rowView.findViewById(R.id.serviceimg);
 		holder.tv.setHeight(100);
 		holder.tv.setMinimumHeight(100);
-		holder.tv.setText(result[position]);
-		imageloder.displayImage(IMAGES[position], holder.img, option,
+
+		holder.tv.setText(TitleSe.get(position));
+		holder.tv1.setText(DescSe.get(position));
+
+		imageloder.displayImage(linkSe.get(position), holder.img, option,
 				animateFirstListener);
-		// holder.img.setImageResource(imageId[position]);
-		/*
-		 * rowView.setOnClickListener(new OnClickListener() {
-		 * 
-		 * @Override public void onClick(View v) { // TODO Auto-generated method
-		 * stub Toast.makeText(context, "You Clicked " + result[position],
-		 * Toast.LENGTH_LONG).show(); } });
-		 */
+
 		return rowView;
 	}
 
+	// this is to get curved the image in all sides  
+	
 	public static class AnimateFirstDisplayListener extends
 			SimpleImageLoadingListener {
 

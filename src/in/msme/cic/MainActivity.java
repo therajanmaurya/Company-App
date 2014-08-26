@@ -1,27 +1,20 @@
-/*
- * Copyright (C) 2013 Andreas Stuetz <andreas.stuetz@gmail.com>
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package in.msme.cic;
 
+import java.util.List;
+
 import com.actionbarsherlock.app.SherlockFragmentActivity;
+
+import android.R.id;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.Fragment;
+import android.content.ActivityNotFoundException;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -62,9 +55,10 @@ public class MainActivity extends SherlockFragmentActivity implements
 		titles = getResources().getStringArray(R.array.msme_names);
 		contacts = getResources().getStringArray(R.array.contact_me);
 		listView.setAdapter(new ArrayAdapter<String>(this,
-				android.R.layout.simple_selectable_list_item, titles));
+				android.R.layout.simple_dropdown_item_1line, titles));
 		listView2.setAdapter(new ArrayAdapter<String>(this,
-				android.R.layout.simple_selectable_list_item, contacts));
+				android.R.layout.simple_dropdown_item_1line, contacts));
+		
 		listView.setOnItemClickListener(this);
 		listView2.setOnItemClickListener(this);
 
@@ -99,8 +93,6 @@ public class MainActivity extends SherlockFragmentActivity implements
 
 	}
 
-	
-	
 	@Override
 	public boolean onOptionsItemSelected(
 			com.actionbarsherlock.view.MenuItem item) {
@@ -144,10 +136,10 @@ public class MainActivity extends SherlockFragmentActivity implements
 
 			switch (position) {
 			case 0:
-				getSupportFragmentManager()
-						.beginTransaction()
-						.add(R.id.content, home.newInstance(position), home.TAG)
-						.commit();
+				home firstFragment = new home();
+				firstFragment.setArguments(getIntent().getExtras());
+				getSupportFragmentManager().beginTransaction()
+						.replace(R.id.content, firstFragment).commit();
 				break;
 
 			case 1:
@@ -158,40 +150,36 @@ public class MainActivity extends SherlockFragmentActivity implements
 				break;
 
 			case 2:
-				getSupportFragmentManager().beginTransaction()
-						.replace(R.id.content, Deals.newInstance(position + 1))
-						.commit();
-				break;
-			case 3:
 				getSupportFragmentManager()
 						.beginTransaction()
 						.replace(R.id.content, Events.newInstance(position + 1))
 						.commit();
 				break;
-			case 4:
+			case 3:
 				getSupportFragmentManager()
 						.beginTransaction()
 						.replace(R.id.content, Latest.newInstance(position + 1))
 						.commit();
 				break;
-			case 5:
+			case 4:
 				getSupportFragmentManager()
 						.beginTransaction()
 						.replace(R.id.content,
 								Connect.newInstance(position + 1)).commit();
 				break;
-			case 6:
+			case 5:
 				getSupportFragmentManager()
 						.beginTransaction()
 						.replace(R.id.content,
 								Downloads.newInstance(position + 1)).commit();
 				break;
-			case 7:
+			case 6:
 				getSupportFragmentManager()
 						.beginTransaction()
 						.replace(R.id.content,
 								Gallery.newInstance(position + 1)).commit();
 				break;
+
 			/*
 			 * default:
 			 * 
@@ -204,64 +192,63 @@ public class MainActivity extends SherlockFragmentActivity implements
 
 			switch (position) {
 			case 0:
-				Intent facebook = new Intent(Intent.ACTION_VIEW,
-						Uri.parse("https://www.facebook.com/pa1.pal"));
-				startActivity(facebook);
+				Intent facebookIntent = getOpenFacebookIntent(this
+						.getApplicationContext());
+				startActivity(facebookIntent);
 				break;
 
 			case 1:
-				Intent twitter = new Intent(Intent.ACTION_VIEW,
-						Uri.parse("https://twitter.com/pa1pal"));
-				startActivity(twitter);
+				try {
+					startActivity(new Intent(Intent.ACTION_VIEW,
+							Uri.parse("twitter://user?screen_name="
+									+ "iamsmeofindia")));
+				} catch (Exception e) {
+					startActivity(new Intent(Intent.ACTION_VIEW,
+							Uri.parse("https://twitter.com/#!/"
+									+ "iamsmeofindia")));
+				}
 				break;
 
 			case 2:
-				Intent gplus = new Intent(
-						Intent.ACTION_VIEW,
-						Uri.parse("https://plus.google.com/u/0/+PawanPalPa1/posts"));
-				startActivity(gplus);
+				openGPlus("107620463159280242405");
 				break;
 
 			case 3:
-				Intent yt = new Intent(Intent.ACTION_VIEW,
-						Uri.parse("https://www.youtube.com"));
-				startActivity(yt);
+				Intent intent = null;
+				String url = "https://www.youtube.com/channel/UCvNLtCUbGzw4J5etQOHx52Q";
+				try {
+					intent = new Intent(Intent.ACTION_VIEW);
+					intent.setPackage("com.google.android.youtube");
+					intent.setData(Uri.parse(url));
+					startActivity(intent);
+				} catch (ActivityNotFoundException e) {
+					intent = new Intent(Intent.ACTION_VIEW);
+					intent.setData(Uri.parse(url));
+					startActivity(intent);
+				}
 				break;
 
 			case 4:
-				Intent ig = new Intent(Intent.ACTION_VIEW,
-						Uri.parse("http://instagram.com/"));
-				startActivity(ig);
-				break;
-
-			case 5:
-				Intent tm = new Intent(Intent.ACTION_VIEW,
-						Uri.parse("https://www.tumblr.com/"));
-				startActivity(tm);
-				break;
-
-			case 6:
-				Intent pint = new Intent(Intent.ACTION_VIEW,
-						Uri.parse("https://www.pinterest.com/"));
-				startActivity(pint);
-				break;
-
-			case 7:
 				Intent web = new Intent(Intent.ACTION_VIEW,
-						Uri.parse("https://www.facebook.com/pa1.pal"));
+						Uri.parse("http://iamsmeofindia.com/"));
 				startActivity(web);
 				break;
 
-			case 8:
-				Intent flickr = new Intent(Intent.ACTION_VIEW,
-						Uri.parse("https://www.flickr.com/"));
-				startActivity(flickr);
-				break;
-
-			case 9:
-				Intent su = new Intent(Intent.ACTION_VIEW,
-						Uri.parse("https://www.stumbleupon.com/"));
-				startActivity(su);
+			case 5:
+				try {
+					String address = "New Industrial Township, Faridabad, Haryana, India";// Get
+																							// address
+					address = address.replace(' ', '+');
+					Intent geoIntent = new Intent(
+							android.content.Intent.ACTION_VIEW,
+							Uri.parse("geo:0,0?q=" + address)); // Prepare
+																// intent
+					startActivity(geoIntent); // Initiate lookup
+				} catch (Exception e) {
+					startActivity(new Intent(
+							android.content.Intent.ACTION_VIEW,
+							Uri.parse("http://maps.google.com/maps?ll=28.385703,77.299796&z=14&t=m&hl=en-US&gl=US&mapclient=embed&q=New%20Industrial%20Township%20Faridabad%2C%20Haryana%20121001%20India")));
+				}
 				break;
 
 			}
@@ -272,7 +259,16 @@ public class MainActivity extends SherlockFragmentActivity implements
 		// TODO Auto-generated method stub
 		if (drawerLayout.isDrawerVisible(Gravity.LEFT)) {
 			listView.setItemChecked(position, true);
-			setTitle(titles[position]);
+
+			if (position == 0) {
+				setTitle("");
+
+			} else {
+				setTitle(titles[position]);
+			}
+
+			drawerLayout.closeDrawer(listView);
+
 		}
 	}
 
@@ -281,6 +277,34 @@ public class MainActivity extends SherlockFragmentActivity implements
 		if (drawerLayout.isDrawerVisible(Gravity.LEFT)) {
 			getSupportActionBar().setTitle(title);
 		}
+	}
+
+	public static Intent getOpenFacebookIntent(Context context) {
+
+		try {
+			context.getPackageManager()
+					.getPackageInfo("com.facebook.katana", 0);
+
+			return new Intent(Intent.ACTION_VIEW,
+					Uri.parse("fb://profile/631552371"));
+		} catch (Exception e) {
+			return new Intent(Intent.ACTION_VIEW,
+					Uri.parse("https://www.facebook.com/therajanmaurya"));
+		}
+	}
+
+	public void openGPlus(String profile) {
+		try {
+			Intent intent = new Intent(Intent.ACTION_VIEW);
+			intent.setClassName("com.google.android.apps.plus",
+					"com.google.android.apps.plus.phone.UrlGatewayActivity");
+			intent.putExtra("customAppUri", profile);
+			startActivity(intent);
+		} catch (ActivityNotFoundException e) {
+			startActivity(new Intent(Intent.ACTION_VIEW,
+					Uri.parse("https://plus.google.com/" + profile + "/posts")));
+		}
+
 	}
 
 }

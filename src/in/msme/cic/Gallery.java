@@ -1,9 +1,17 @@
 package in.msme.cic;
 
+import in.msme.cic.database.Gallerysql;
+
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -15,10 +23,13 @@ import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListene
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -29,15 +40,29 @@ import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
+import android.widget.Toast;
 
 public class Gallery extends Fragment {
 
-	
 	Context context;
 	static DisplayImageOptions options;
 	protected ImageLoader imageLoader = ImageLoader.getInstance();
-
+	Gallerysql db;
+	ListView right, left;
+	GalleryAdapter gallery;
+	Button refresh;
+	ConnectionDetector cd;
+	Boolean isInternetPresent = false;
 	private static final String ARG_SECTION_NUMBER = "section_number";
+	ProgressDialog progress;
+	private static String urljson = "http://pa1pal.tk/Gallery.json";
+	private static final String TAG_Latest = "Gallery";
+	private static final String TAG_TITLE = "Image";
+	ProgressBar pro;
+	JSONArray Latest = null;
+	ArrayList<String> image = new ArrayList<String>();
+    ArrayList<String> urlf = new ArrayList<String>();
 
 	public static Gallery newInstance(int sectionNumber) {
 		Gallery fragment = new Gallery();
@@ -53,42 +78,144 @@ public class Gallery extends Fragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		View V = inflater.inflate(R.layout.fragment_gallery, container, false);
+		context =getActivity().getApplicationContext();
+		View V = inflater.inflate(R.layout.fragment_gallery, container, false);	
+		Button refresh = (Button) V.findViewById(R.id.ref);
+		ListView left = (ListView) V.findViewById(R.id.left_list);
+		ListView right = (ListView) V.findViewById(R.id.right_list);
+	    imageloder();
+	    db=new Gallerysql(context);
+	    
+	    ArrayList<String> sam = new ArrayList<String>();
+		Log.e("tag", "working");
+		sam = db.getAllSevices();
+		
+
+		for (int i = 0; i < sam.size(); i++) {
+			String m1;
+			
+			m1 = sam.get(i);
+			
+			image.add(m1);
+			Log.e("tag", m1);
+		}
+	    gallery = new GalleryAdapter(context, options, getActivity(), image);
+	    
+		cd = new ConnectionDetector(getActivity().getApplicationContext());
+		isInternetPresent = cd.isConnectingToInternet();
+
+		if (isInternetPresent) {
+			GetContacts Ldata = new GetContacts();
+			context.deleteDatabase("GalleryDB");
+			Ldata.execute();
+			left.setAdapter(gallery);
+			right.setAdapter(gallery);
+			
+
+
+		} else {
+
+			Toast.makeText(getActivity(),
+					"Please Connect To Internet Connection", Toast.LENGTH_LONG)
+					.show();
+			left.setAdapter(gallery);
+			right.setAdapter(gallery);
+
+		}
+
+		refresh.setOnClickListener(new View.OnClickListener() {
+
+			@SuppressWarnings("deprecation")
+			@Override
+			public void onClick(View v) {
+
+				if (isInternetPresent) {
+					imageLoader.clearMemoryCache();
+					imageLoader.clearDiscCache();
+					gallery.notifyDataSetChanged();
+				} else {
+
+					Toast.makeText(getActivity(), "First Connect to Internet",
+							Toast.LENGTH_LONG).show();
+				}
+
+			}
+		});
+
+		return V;
+
+	}
+
+	private class GetContacts extends AsyncTask<Void, Void, Void> {
+
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+			progress = ProgressDialog.show(getActivity(), "Fetching Gallery",
+					"Please Wait.........", true);
+
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		protected Void doInBackground(Void... arg0) {
+			ServiceHandler sh = new ServiceHandler();
+			String jsonStr = sh.makeServiceCall(urljson, ServiceHandler.GET);
+
+			Log.d("Response: ", "> " + jsonStr);
+
+			if (jsonStr != null) {
+				try {
+					JSONObject jsonObj = new JSONObject(jsonStr);
+
+					// Getting JSON Array node
+					Latest = jsonObj.getJSONArray(TAG_Latest);
+
+					for (int i = 0; i < Latest.length(); i++) {
+						JSONObject c = Latest.getJSONObject(i);
+
+						String image_link = c.getString(TAG_TITLE);
+						// tmp hashmap for single contact
+						db.addService(image_link);
+//						HashMap<String, String> contact = new HashMap<String, String>();
+//						image.add(image_link);
+					}
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
+			} else {
+				Log.e("ServiceHandler", "Couldn't get any data from the url");
+			}
+
+			return null;
+		}
+
+		@SuppressWarnings("deprecation")
+		@Override
+		protected void onPostExecute(Void result) {
+			super.onPostExecute(result);
+			progress.dismiss();
+
+		}
+
+	}
+
+	public void imageloder() {
 
 		DisplayImageOptions displayimageOptions = new DisplayImageOptions.Builder()
 				.cacheInMemory().cacheOnDisc().build();
 
-		// Create global configuration and initialize ImageLoader with this
-		// configuration
 		ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(
 				getActivity().getApplicationContext())
 				.defaultDisplayImageOptions(displayimageOptions).build();
 		ImageLoader.getInstance().init(config);
-		Button refresh = (Button) V.findViewById(R.id.ref);
-		ListView left = (ListView) V.findViewById(R.id.left_list);
-		ListView right = (ListView) V.findViewById(R.id.right_list);
+
 		options = new DisplayImageOptions.Builder()
 				.showImageOnLoading(R.drawable.image1)
 				.showImageForEmptyUri(R.drawable.image1)
 				.showImageOnFail(R.drawable.image1).cacheInMemory(true)
 				.cacheOnDisk(true).considerExifParams(true)
 				.displayer(new RoundedBitmapDisplayer(20)).build();
-		final adapterr Adapterr = new adapterr(context, options, getActivity());
-		left.setAdapter(Adapterr);
-		right.setAdapter(Adapterr);
-
-		refresh.setOnClickListener(new View.OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				// TODO Auto-generated method stub
-				imageLoader.clearMemoryCache();
-				imageLoader.clearDiscCache();
-				Adapterr.notifyDataSetChanged();
-			}
-		});
-
-		return V;
 
 	}
 
@@ -114,7 +241,7 @@ public class Gallery extends Fragment {
 }
 
 @SuppressLint("ViewHolder")
-class adapterr extends BaseAdapter {
+class GalleryAdapter extends BaseAdapter {
 
 	private Activity activity;
 
@@ -126,50 +253,23 @@ class adapterr extends BaseAdapter {
 	protected ImageLoader imageloder = ImageLoader.getInstance();
 	private ImageLoadingListener animateFirstListener = new AnimateFirstDisplayListener();
 	DisplayImageOptions option;
-	public static final String[] IMAGES = new String[] {
-			// Heavy images
-			"http://iamsmeofindia.com/sites/default/files/3_2.jpg",
-			"http://iamsmeofindia.com/sites/default/files/4_2.jpg",
-			"http://iamsmeofindia.com/sites/default/files/2_2.jpg",
-			"http://iamsmeofindia.com/sites/default/files/1_2.jpg",
-			"http://iamsmeofindia.com/sites/default/files/13_0.jpg",
-			"http://iamsmeofindia.com/sites/default/files/11_2.jpg",
-			"http://iamsmeofindia.com/sites/default/files/14_0.jpg",
-			"http://iamsmeofindia.com/sites/default/files/12_0.jpg",
-			"http://www.frenchrevolutionfood.com/wp-content/uploads/2009/04/Twitter-Bird.png",
-			"http://3.bp.blogspot.com/-ka5MiRGJ_S4/TdD9OoF6bmI/AAAAAAAAE8k/7ydKtptUtSg/s1600/Google_Sky%2BMaps_Android.png",
-			"http://www.desiredsoft.com/images/icon_webhosting.png",
-			"http://goodereader.com/apps/wp-content/uploads/downloads/thumbnails/2012/01/hi-256-0-99dda8c730196ab93c67f0659d5b8489abdeb977.png",
-			"http://1.bp.blogspot.com/-mlaJ4p_3rBU/TdD9OWxN8II/AAAAAAAAE8U/xyynWwr3_4Q/s1600/antivitus_free.png",
-			"http://cdn3.iconfinder.com/data/icons/transformers/computer.png",
-			"http://cdn.geekwire.com/wp-content/uploads/2011/04/firefox.png?7794fe",
-			"https://ssl.gstatic.com/android/market/com.rovio.angrybirdsseasons/hi-256-9-347dae230614238a639d21508ae492302340b2ba",
-			"http://androidblaze.com/wp-content/uploads/2011/12/tablet-pc-256x256.jpg",
-			"http://www.theblaze.com/wp-content/uploads/2011/08/Apple.png",
-			"http://1.bp.blogspot.com/-y-HQwQ4Kuu0/TdD9_iKIY7I/AAAAAAAAE88/3G4xiclDZD0/s1600/Twitter_Android.png",
-			"http://3.bp.blogspot.com/-nAf4IMJGpc8/TdD9OGNUHHI/AAAAAAAAE8E/VM9yU_lIgZ4/s1600/Adobe%2BReader_Android.png",
-			"http://cdn.geekwire.com/wp-content/uploads/2011/05/oovoo-android.png?7794fe",
-			"http://icons.iconarchive.com/icons/kocco/ndroid/128/android-market-2-icon.png",
-			"http://thecustomizewindows.com/wp-content/uploads/2011/11/Nicest-Android-Live-Wallpapers.png",
-			"http://c.wrzuta.pl/wm16596/a32f1a47002ab3a949afeb4f",
-			"http://macprovid.vo.llnwd.net/o43/hub/media/1090/6882/01_headline_Muse.jpg",
+	ArrayList<String> Img_link = new ArrayList<String>();
+	
 
-	};
-
-	public adapterr(Context context, DisplayImageOptions options, Activity a) {
+	public GalleryAdapter(Context context, DisplayImageOptions options,
+			Activity a, ArrayList<String> image) {
 		activity = a;
 		inflater = (LayoutInflater) activity
 				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		option = options;
-		// Create ImageLoader object to download and show image in list
-		// Call ImageLoader constructor to initialize FileCache
+		Img_link = image;
 
 	}
 
 	@Override
 	public int getCount() {
 		// TODO Auto-generated method stub
-		return IMAGES.length;
+		return Img_link.size();
 	}
 
 	@Override
@@ -207,9 +307,7 @@ class adapterr extends BaseAdapter {
 			holder.image.getLayoutParams().height = number;
 		}
 
-		ImageView image = holder.image;
-
-		imageloder.displayImage(IMAGES[position], holder.image, option,
+		imageloder.displayImage(Img_link.get(position), holder.image, option,
 				animateFirstListener);
 
 		return v;

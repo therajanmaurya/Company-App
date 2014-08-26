@@ -30,6 +30,30 @@ public class home extends Main{
 			Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
 		View V = inflater.inflate(R.layout.home, container, false);
+		
+		PageSlidingTabStripFragment firstFragment1 = new PageSlidingTabStripFragment();
+		firstFragment1.setArguments(getActivity().getIntent().getExtras());
+		getFragmentManager().beginTransaction()
+				.replace(R.id.fragmentfirst, firstFragment1).commit();
+		
+		Second firstFragment2 = new Second();
+		firstFragment2.setArguments(getActivity().getIntent().getExtras());
+		getFragmentManager().beginTransaction()
+				.replace(R.id.fragmentsecond, firstFragment2).commit();
+		
+		Third firstFragment3 = new Third();
+		firstFragment3.setArguments(getActivity().getIntent().getExtras());
+		getFragmentManager().beginTransaction()
+				.replace(R.id.fragmentthird, firstFragment3).commit();
+		
+		First firstFragment4 = new First();
+		firstFragment4.setArguments(getActivity().getIntent().getExtras());
+		getFragmentManager().beginTransaction()
+				.replace(R.id.fragmentforth, firstFragment4).commit();
+		
+		
+		
+		
 		return V;
 	}
 }
