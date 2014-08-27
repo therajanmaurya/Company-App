@@ -109,6 +109,7 @@ public class Services extends Fragment {
 			Bundle savedInstanceState) {
 		View V = inflater.inflate(R.layout.fragment_services, container, false);
 		proBar = (ProgressBar)V.findViewById(R.id.PService);
+		proBar.setVisibility(View.GONE);
 		listservice = (ListView) V.findViewById(R.id.servicelist);
 		@SuppressWarnings("deprecation")
 	    

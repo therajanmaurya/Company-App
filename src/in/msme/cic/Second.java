@@ -90,6 +90,7 @@ public class Second extends Fragment {
 		View V = inflater.inflate(R.layout.second, container, false);
 		context = getActivity().getApplicationContext();
 	    progr = (ProgressBar)V.findViewById(R.id.progressBar1);
+	    progr.setVisibility(View.GONE);
 		db = new EventSQL(context);
 		DisplayImageOptions displayimageOptions = new DisplayImageOptions.Builder()
 				.cacheInMemory().cacheOnDisc().build();

@@ -19,8 +19,10 @@ import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
 import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 
 import android.annotation.TargetApi;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
@@ -134,6 +136,14 @@ public class Latest extends Fragment {
 			super.onPreExecute();
 			progress = ProgressDialog.show(getActivity(),
 					"Fetching Latest News", "Wait ........", true);
+			progress.setCancelable(true);
+			progress.setOnCancelListener(new Dialog.OnCancelListener() {
+
+			    @Override
+			    public void onCancel(DialogInterface dialog) {
+			        Toast.makeText(getActivity(), "Please Wait While Fetching data", Toast.LENGTH_SHORT).show();
+			    }
+			});
 
 		}
 

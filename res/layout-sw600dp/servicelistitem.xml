@@ -25,7 +25,7 @@
         android:layout_marginBottom="14dp"
         android:layout_toRightOf="@+id/serviceimg"
         android:text="TextView"
-        android:textSize="25dp" />
+        android:textSize="15dp" />
 
     <TextView
         android:id="@+id/subhead"
